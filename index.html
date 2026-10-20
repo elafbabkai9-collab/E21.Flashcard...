@@ -703,18 +703,26 @@ const Storage = {
     }
 };
 
-let saveInFlight = false;
-let savePending = false;
-async function save() {
+// FIX: save() پێشتر هیچی نەدەگەڕاندەوە، بۆیە هاوردەکردن دەیتوانی "سەرکەوتوو بوو" پیشان بدات کاتێک نووسین شکستی هێنابوو.
+// ئێستا promiseـێک دەگەڕێنێتەوە کە true/false ە (دوایین نووسین سەرکەوتوو بوو یان نا). نووسینە هاوکاتەکان لە یەک خولدا یەکدەگیرێن.
+let savePending = false, saveLoopPromise = null, lastSaveOk = true;
+function save() {
     savePending = true;
-    if (saveInFlight) return; // پاشەکەوتکردنێک ئێستا لە کارە، ئەمە لەگەڵ خۆیدا دەیبات کاتێک تەواو بوو
-    saveInFlight = true;
-    while (savePending) {
-        savePending = false;
-        const result = await Storage.set(STORAGE_KEY, JSON.stringify(state));
-        if (!result) toast('⚠️ نەتوانرا داتا پاشەکەوت بکرێت — بیرگەی وێبگەڕەکەت پڕە یان ناچالاکە');
+    if (!saveLoopPromise) {
+        saveLoopPromise = (async () => {
+            try {
+                while (savePending) {
+                    savePending = false;
+                    const result = await Storage.set(STORAGE_KEY, JSON.stringify(state));
+                    lastSaveOk = !!result;
+                    if (!result) toast('⚠️ نەتوانرا داتا پاشەکەوت بکرێت — بیرگەی وێبگەڕەکەت پڕە یان ناچالاکە');
+                }
+            } catch (err) { console.error('save failed:', err); lastSaveOk = false; }
+            finally { saveLoopPromise = null; }
+            return lastSaveOk;
+        })();
     }
-    saveInFlight = false;
+    return saveLoopPromise;
 }
 
 async function load() {
@@ -737,7 +745,8 @@ async function load() {
                 if (!state.progress) state.progress = { xp: 0, streak: 0, bestStreak: 0, lastStudyDate: null, daily: {}, totalPomodoros: 0 };
                 normalizeSettings();
                 // MIGRATION: کارتە کۆنەکان (بەپێی level) دەگۆڕدرێن بۆ فۆرماتی SRS v2، بەبێ لەدەستدانی هیچ داتایەک
-                state.cards = state.cards.map(migrateCard).map(sanitizeCard);
+                state.cards = state.cards.filter(c => c && typeof c === 'object').map(migrateCard).map(sanitizeCard);
+                healIds(state); // SECURITY/FIX: id ی نائارام نابێتە بەشێک لە onclick
                 normalizeSession(); // FIX: queue ببێتە لیستی id
             }
         }
@@ -1860,7 +1869,7 @@ function restoreCard(id) {
 
 /* ---------------- manage ---------------- */
 function escapeHtml(str) {
-    return (str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    return String(str == null ? '' : str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 }
 
 let manageSortBy = 'newest';
@@ -2019,6 +2028,7 @@ function deleteSelectedCards() {
     if (!confirm(`دڵنیایت لە سڕینەوەی ${selectedCardIds.size} کارت؟`)) return;
     state.cards = state.cards.filter(c => !selectedCardIds.has(c.id));
     selectedCardIds.clear();
+    normalizeSession();
     save();
     renderManage();
     renderHome();
@@ -2045,6 +2055,7 @@ function deleteCard(id) {
     if (confirm('دڵنیایت لە سڕینەوەی ئەم کارتە؟')) {
         state.cards = state.cards.filter(c => c.id !== id);
         selectedCardIds.delete(id);
+        normalizeSession();
         save();
         renderManage();
         renderHome();
@@ -2121,149 +2132,202 @@ function exportData() {
 
 function triggerImport() { document.getElementById('file-input').click(); }
 
-// FEATURE (Merge Import): هاوردەکردنی داتا ئێستا Merge ـە نەک Replace — هیچ کارت و پێشکەوتنێکی ئێستا ناسڕێتەوە
+/* ===== Merge Import v2 — یاساکان (field-level rules) =====
+   CARD MATCH : ١) هەمان id + لانیکەم یەکێک لە en/ku وەک یەک (دوای ڕێکخستنی بۆشایی/پیتی گەورە) ← هەمان کارت
+                ٢) ئەگەرنا هەمان fingerprint ی en|ku ← هەمان کارت. تەنها en یان تەنها ku وەک یەک بوو = کارتی جیاواز.
+   MATCHED    : کارتی ئێستا زاڵە (دەق، دەستە، id، خشتەبەندی، مێژوو). تەنها: mn ی بەتاڵ پڕدەکرێتەوە؛ ئەگەر کارتی ئێستا
+                هەرگیز پێداچوونەوەی نەکرابێت (reviewCount=0) و ئەوەی فایل کرابێت، خشتەبەندییەکەی فایل وەردەگیرێت.
+   DECKS      : default↔default؛ id+ناو وەک یەک؛ ناوی ڕێکخراو وەک یەک ← یەکدەگیرێن؛ id ی ناکۆک بە ناوی جیاواز ← دەستەی نوێ.
+   PROGRESS   : xp/bestStreak/pomodoro = max؛ daily هەر خانەیەک = max (دووبارە ناکرێتەوە)؛ ئەرکەکان OR؛ settings ی ئێستا دەمێنێت.
+   هیچ شتێک لەسەر state نانووسرێت تا پشتڕاستکردنەوە؛ هەموو شتێک لەسەر کۆپی `work` دەکرێت. */
 const SCHEDULE_FIELDS = ['easeFactor', 'interval', 'difficulty', 'stability', 'reviewCount', 'failCount', 'lastReviewDate', 'due', 'status', 'masteredDate'];
 const DAILY_NUM_FIELDS = ['reviews', 'newCards', 'studyMs', 'pomodoros'];
+const MAX_TEXT_LEN = 5000;
+const SAFE_DECK_ID = /^[A-Za-z0-9_-]{1,80}$/;
+const SAFE_DAY = /^\d{4}-\d{2}-\d{2}$/;
+const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
-// FEATURE: هەمان کلیلی showImportPreview بۆ دۆزینەوەی دووبارە
-function cardDupKey(c) { return String(c.en || '').trim().toLowerCase() + '|' + String(c.ku || '').trim().toLowerCase(); }
+const normText = s => String(s == null ? '' : s).normalize('NFC').replace(/\s+/g, ' ').trim().toLowerCase();
+function cardDupKey(c) { return normText(c.en) + '|' + normText(c.ku); }
+const isSafeCardId = id => typeof id === 'number' && Number.isFinite(id);
+function newCardId(used) { let id; do { id = Date.now() + Math.random(); } while (used.has(id)); return id; }
+function newDeckId(used) { let id; do { id = 'deck_' + Date.now() + '_' + Math.floor(Math.random() * 1e6); } while (used.has(id)); return id; }
 
-// FEATURE: ئایا کارتی a پێشکەوتنی زیاترە لە b؟ (reviewCount ی زیاتر، یاخود lastReviewDate ی نوێتر)
-function isMoreProgressed(a, b) {
-    const ra = Number(a.reviewCount) || 0, rb = Number(b.reviewCount) || 0;
-    if (ra !== rb) return ra > rb;
-    return (Number(a.lastReviewDate) || 0) > (Number(b.lastReviewDate) || 0);
+// id ی کارت دەبێت ژمارەی سنووردار و تاک بێت، id ی دەستە تەنها پیت/ژمارە/_/- (چونکە دەچنە ناو onclick="...")
+function healIds(st) {
+    st.decks = (Array.isArray(st.decks) ? st.decks : []).filter(d => d && typeof d === 'object');
+    const dUsed = new Set(), dMap = new Map();
+    st.decks.forEach(d => {
+        const old = d.id;
+        if (typeof old !== 'string' || !SAFE_DECK_ID.test(old) || dUsed.has(old)) d.id = newDeckId(dUsed);
+        if (!dMap.has(old)) dMap.set(old, d.id);
+        dUsed.add(d.id);
+        d.name = String(d.name == null ? '' : d.name).trim() || 'دەستە';
+    });
+    const used = new Set();
+    st.cards.forEach(c => {
+        if (!isSafeCardId(c.id) || used.has(c.id)) c.id = newCardId(used);
+        used.add(c.id);
+        if (dMap.has(c.deckId)) c.deckId = dMap.get(c.deckId);
+    });
 }
 
-// FEATURE: داتای فایلەکە دەخاتە سەر `work` (کۆپییەکی جیا لە state) و ئامارەکان دەگەڕێنێتەوە
 function mergeBackupInto(work, parsed) {
     const now = Date.now();
-    const stats = { newCards: 0, dupes: 0, newDecks: 0 };
     const num = v => (Number.isFinite(Number(v)) ? Number(v) : 0);
+    const st = { newCards: 0, matchedById: 0, matchedByContent: 0, reconciled: 0, fileDupes: 0, rejected: 0, newDecks: 0, matchedDecks: 0, deckConflicts: 0 };
+    work.cards = Array.isArray(work.cards) ? work.cards : [];
+    healIds(work);
+    if (work.decks.length === 0) work.decks = [{ id: 'default', name: 'دەستەی سەرەکی', created: now }];
+    const dUsed = new Set(work.decks.map(d => d.id));
+    const dMap = new Map();
 
-    // --- دەستەکان: بەپێی id یاخود ناو (بێ گرنگی بە پیتی گەورە/بچووک) یەکیان دەکەینەوە ---
-    if (!Array.isArray(work.decks) || work.decks.length === 0) work.decks = [{ id: 'default', name: 'دەستەی سەرەکی', created: now }];
-    const usedDeckIds = new Set(work.decks.map(d => d.id));
-    const deckIdMap = new Map(); // id ی دەستەی فایل → id ی دەستەی یەکخراو
+    // --- دەستەکان ---
     (Array.isArray(parsed.decks) ? parsed.decks : []).forEach(d => {
-        if (!d || typeof d !== 'object') return;
-        const name = String(d.name == null ? '' : d.name).trim();
-        let target = (d.id != null && work.decks.find(x => x.id === d.id))
-            || (name && work.decks.find(x => String(x.name).trim().toLowerCase() === name.toLowerCase()));
-        if (!target) {
-            let id = (d.id != null && !usedDeckIds.has(d.id)) ? d.id : null;
-            while (id == null || usedDeckIds.has(id)) id = 'deck_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+        if (!d || typeof d !== 'object') { st.rejected++; return; }
+        const name = String(d.name == null ? '' : d.name).trim().slice(0, 200);
+        let target = null;
+        if (d.id === 'default') target = work.decks.find(x => x.id === 'default') || null;
+        if (!target && typeof d.id === 'string') target = work.decks.find(x => x.id === d.id && normText(x.name) === normText(name)) || null;
+        if (!target && name) target = work.decks.find(x => normText(x.name) === normText(name)) || null;
+        if (target) st.matchedDecks++;
+        else {
+            if (typeof d.id === 'string' && dUsed.has(d.id)) st.deckConflicts++;
+            const id = (typeof d.id === 'string' && SAFE_DECK_ID.test(d.id) && !dUsed.has(d.id)) ? d.id : newDeckId(dUsed);
             target = { id, name: name || 'دەستە', created: num(d.created) || now };
-            work.decks.push(target);
-            usedDeckIds.add(id);
-            stats.newDecks++;
+            work.decks.push(target); dUsed.add(id); st.newDecks++;
         }
-        if (d.id != null) deckIdMap.set(d.id, target.id);
+        if (d.id !== undefined) dMap.set(d.id, target.id);
     });
     const mainDeck = work.decks.find(d => d.id === 'default') || work.decks[0];
 
     // --- کارتەکان ---
-    const existing = new Map(), usedIds = new Set();
-    work.cards.forEach(c => { usedIds.add(c.id); const k = cardDupKey(c); if (!existing.has(k)) existing.set(k, c); });
-    (parsed.cards || []).forEach(raw => {
-        if (!raw || typeof raw !== 'object') return;
-        const inc = sanitizeCard(migrateCard(Object.assign({}, raw)));
-        const key = cardDupKey(inc);
-        if (key === '|') return; // ڕیزی بەتاڵ
-        const hit = existing.get(key);
+    const byId = new Map(), byKey = new Map();
+    work.cards.forEach(c => { byId.set(c.id, c); const k = cardDupKey(c); if (!byKey.has(k)) byKey.set(k, c); });
+    const used = new Set(byId.keys()), seenInFile = new Set();
+    (Array.isArray(parsed.cards) ? parsed.cards : []).forEach(raw => {
+        if (!raw || typeof raw !== 'object' || Array.isArray(raw)) { st.rejected++; return; }
+        const en = typeof raw.en === 'string' ? raw.en.trim() : '', ku = typeof raw.ku === 'string' ? raw.ku.trim() : '';
+        if (!en || !ku || en.length > MAX_TEXT_LEN || ku.length > MAX_TEXT_LEN) { st.rejected++; return; }
+        // تەنها خانە ناسراوەکان وەردەگیرێن (نەک Object.assign ی هەموو شتێک)
+        const inc = sanitizeCard(migrateCard({
+            id: raw.id, en, ku, mn: typeof raw.mn === 'string' ? raw.mn.trim().slice(0, MAX_TEXT_LEN) : '', deckId: raw.deckId, level: raw.level,
+            easeFactor: raw.easeFactor, interval: raw.interval, difficulty: raw.difficulty, stability: raw.stability, reviewCount: raw.reviewCount,
+            failCount: raw.failCount, lastReviewDate: raw.lastReviewDate, due: raw.due, status: raw.status, masteredDate: raw.masteredDate
+        }));
+        const k = cardDupKey(inc);
+        let hit = isSafeCardId(raw.id) ? (byId.get(raw.id) || null) : null, how = 'id';
+        if (hit && normText(hit.en) !== normText(inc.en) && normText(hit.ku) !== normText(inc.ku)) hit = null; // id وەک یەکە بەڵام مانا جیاوازە
+        if (!hit) { hit = byKey.get(k) || null; how = 'content'; }
         if (hit) {
-            // کارتی دووبارە: ئەوەی پێشکەوتنی زیاترە دەمێنێت، بەبێ تێکەڵکردنی خانەکانی SM-2
-            stats.dupes++;
-            if (isMoreProgressed(inc, hit)) {
-                SCHEDULE_FIELDS.forEach(f => { if (inc[f] !== undefined) hit[f] = inc[f]; else delete hit[f]; });
-            }
+            if (seenInFile.has(hit.id)) st.fileDupes++; else if (how === 'id') st.matchedById++; else st.matchedByContent++;
+            seenInFile.add(hit.id);
             if (!hit.mn && inc.mn) hit.mn = inc.mn;
-        } else {
-            let did = deckIdMap.get(inc.deckId);
-            if (!did && inc.deckId != null && usedDeckIds.has(inc.deckId)) did = inc.deckId;
-            inc.deckId = did || mainDeck.id;
-            const okType = typeof inc.id === 'number' || typeof inc.id === 'string';
-            while (!okType || inc.id == null || usedIds.has(inc.id) || typeof inc.id === 'boolean') {
-                inc.id = Date.now() + Math.random();
-                if (!usedIds.has(inc.id)) break;
+            if ((hit.reviewCount || 0) === 0 && (inc.reviewCount || 0) > 0) { // ئەوەی ئێستا مێژووی نییە، لەدەستدانی نییە
+                SCHEDULE_FIELDS.forEach(f => { if (inc[f] !== undefined) hit[f] = inc[f]; });
+                st.reconciled++;
             }
-            usedIds.add(inc.id);
-            work.cards.push(inc);
-            existing.set(key, inc);
-            stats.newCards++;
+        } else {
+            inc.deckId = dMap.get(raw.deckId) || (dMap.size === 0 && dUsed.has(raw.deckId) ? raw.deckId : null) || mainDeck.id;
+            if (!isSafeCardId(inc.id) || used.has(inc.id)) inc.id = newCardId(used);
+            used.add(inc.id);
+            inc.created = num(raw.created) || now;
+            work.cards.push(inc); byId.set(inc.id, inc); byKey.set(k, inc); seenInFile.add(inc.id);
+            st.newCards++;
         }
     });
 
-    // --- progress: max (نەک کۆکردنەوە) ---
-    const pa = work.progress = work.progress || { xp: 0, streak: 0, bestStreak: 0, lastStudyDate: null, daily: {}, totalPomodoros: 0 };
+    // --- progress: max (نەک کۆکردنەوە) تا هاوردەی دووبارە XP/ئامار دووجار نەژمێرێت ---
+    const pa = work.progress = (work.progress && typeof work.progress === 'object') ? work.progress : { xp: 0, streak: 0, bestStreak: 0, lastStudyDate: null, daily: {}, totalPomodoros: 0 };
     const pb = (parsed.progress && typeof parsed.progress === 'object') ? parsed.progress : {};
     pa.xp = Math.max(num(pa.xp), num(pb.xp));
     pa.bestStreak = Math.max(num(pa.bestStreak), num(pb.bestStreak));
     pa.totalPomodoros = Math.max(num(pa.totalPomodoros), num(pb.totalPomodoros));
-    const da = pa.lastStudyDate || '', db = (typeof pb.lastStudyDate === 'string' && pb.lastStudyDate) ? pb.lastStudyDate : '';
-    if (db > da) { pa.lastStudyDate = db; pa.streak = num(pb.streak); }       // فایلەکە نوێترە
+    const da = pa.lastStudyDate || '', db = (typeof pb.lastStudyDate === 'string' && SAFE_DAY.test(pb.lastStudyDate)) ? pb.lastStudyDate : '';
+    if (db > da) { pa.lastStudyDate = db; pa.streak = num(pb.streak); }
     else if (db && db === da) pa.streak = Math.max(num(pa.streak), num(pb.streak));
     pa.bestStreak = Math.max(pa.bestStreak, num(pa.streak));
-
     if (!pa.daily || typeof pa.daily !== 'object') pa.daily = {};
     const dailyB = (pb.daily && typeof pb.daily === 'object') ? pb.daily : {};
     Object.keys(dailyB).forEach(day => {
         const rb = dailyB[day];
-        if (!rb || typeof rb !== 'object') return;
+        if (!SAFE_DAY.test(day) || !rb || typeof rb !== 'object') return;
         const ra = pa.daily[day] || (pa.daily[day] = { reviews: 0, newCards: 0, studyMs: 0, pomodoros: 0 });
         DAILY_NUM_FIELDS.forEach(f => { ra[f] = Math.max(num(ra[f]), num(rb[f])); });
-        // ئەرکی تەواوبوو (OR) و XP ی ڕۆژانەی هەر کارتێک (max) — بۆ ئەوەی XP ی ئەرک دووبارە نەدرێتەوە
         if (rb.missionsCompleted && typeof rb.missionsCompleted === 'object') {
             ra.missionsCompleted = ra.missionsCompleted || {};
-            Object.keys(rb.missionsCompleted).forEach(m => { if (rb.missionsCompleted[m]) ra.missionsCompleted[m] = true; });
+            Object.keys(rb.missionsCompleted).forEach(m => { if (!UNSAFE_KEYS.has(m) && rb.missionsCompleted[m] === true) ra.missionsCompleted[m] = true; });
         }
         if (rb.cardXpCount && typeof rb.cardXpCount === 'object') {
             ra.cardXpCount = ra.cardXpCount || {};
-            Object.keys(rb.cardXpCount).forEach(k => { ra.cardXpCount[k] = Math.max(num(ra.cardXpCount[k]), num(rb.cardXpCount[k])); });
+            Object.keys(rb.cardXpCount).forEach(k => { if (!UNSAFE_KEYS.has(k)) ra.cardXpCount[k] = Math.max(num(ra.cardXpCount[k]), num(rb.cardXpCount[k])); });
         }
     });
 
-    // settings: هی ئێستا دەمێنێت. session: ڕێکدەخرێتەوە و queue ی کۆن پاک دەکرێتەوە
+    // --- settings: ئەوەی ئێستا دەمێنێت؛ تەنها ئەوانەی نین پڕدەکرێنەوە (بە پشکنینی جۆر) ---
+    const sa = work.settings = (work.settings && typeof work.settings === 'object') ? work.settings : {};
+    const sb = (parsed.settings && typeof parsed.settings === 'object') ? parsed.settings : {};
+    const okSetting = {
+        voice: v => typeof v === 'string' && v.length < 40, dir: v => v === 'en' || v === 'ku',
+        rate: v => typeof v === 'number' && v >= 0.5 && v <= 2, autoPlay: v => typeof v === 'boolean', autoRepeat: v => typeof v === 'boolean',
+        dailyGoalMin: v => typeof v === 'number' && v > 0 && v <= 600, voiceName: v => typeof v === 'string' && v.length < 200
+    };
+    Object.keys(okSetting).forEach(k => { if ((sa[k] === undefined || sa[k] === null) && okSetting[k](sb[k])) sa[k] = sb[k]; });
+
+    // --- پشتڕاستکردنەوەی ئەنجام پێش commit ---
+    const deckIds = new Set(work.decks.map(d => d.id)), ids = new Set();
+    for (const c of work.cards) {
+        if (!deckIds.has(c.deckId)) c.deckId = mainDeck.id; // هیچ کارتێک بۆ دەستەیەکی نەماو ناچێت
+        if (!isSafeCardId(c.id) || ids.has(c.id) || typeof c.en !== 'string' || typeof c.ku !== 'string' || !Number.isFinite(c.due) || !Number.isFinite(c.easeFactor))
+            throw new Error('merged state failed validation');
+        ids.add(c.id);
+    }
     work.session = { queue: [], currentIndex: 0, deckId: null, global: false, cardsSinceQuote: 0 };
-    return stats;
+    return st;
 }
 
+let importInFlight = false; // ڕێگری لە دوو هاوردەی هاوکات / کلیکی دووبارە
 function handleFile(e) {
-    const file = e.target.files[0];
+    const input = e.target, file = input.files && input.files[0];
+    input.value = '';
     if (!file) return;
+    if (importInFlight) { toast('هاوردەکردنێک ئێستا لە کارە — تکایە چاوەڕێبە'); return; }
+    importInFlight = true;
     const reader = new FileReader();
+    reader.onerror = () => { importInFlight = false; toast('❌ هەڵە لە خوێندنەوەی فایل'); };
     reader.onload = async (event) => {
-        // FEATURE: کۆپییەکی ئاسایش لە state ی ئێستا لە ناو ڕەم، پێش هەر گۆڕانکارییەک
-        const backup = JSON.parse(JSON.stringify(state));
+        const prev = state; // state ی ئێستا تا کۆتایی دەست لێ نادرێت؛ Merge لەسەر کۆپی دەکرێت
         try {
-            const parsed = JSON.parse(event.target.result);
-            if (!parsed || !Array.isArray(parsed.cards)) throw new Error('invalid format');
-            const work = JSON.parse(JSON.stringify(state)); // Merge لەسەر کۆپی دەکرێت، state تا دڵنیابوونەوە دەست لێ نادرێت
-            const stats = mergeBackupInto(work, parsed);
-            if (!confirm(`${stats.newCards} کارتی نوێ، ${stats.dupes} دووبارە (یەکخرانەوە)، ${stats.newDecks} دەستەی نوێ — بەردەوام بیت؟`)) {
-                toast('هاوردەکردن هەڵوەشێنرایەوە — هیچ گۆڕانکارییەک نەکرا');
-                return;
-            }
+            const text = event.target.result;
+            if (typeof text !== 'string' || text.length > 50 * 1024 * 1024) throw new Error('invalid file');
+            const parsed = JSON.parse(text);
+            if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed) || !Array.isArray(parsed.cards)) throw new Error('invalid format');
+            const work = JSON.parse(JSON.stringify(prev));
+            const s = mergeBackupInto(work, parsed);
+            const msg = `پوختەی هاوردەکردن:\n• ${s.newCards} کارتی نوێ زیاد دەکرێت\n• ${s.matchedById + s.matchedByContent} کارتی ئێستا دۆزرانەوە (مێژووی خوێندنیان دەپارێزرێت)\n` +
+                `• ${s.fileDupes} دووبارەی ناو فایل پەڕێندرا • ${s.reconciled} کارت خشتەبەندییان لە فایل وەرگرت (پێشتر هیچ مێژوویەکیان نەبوو)\n` +
+                `• ${s.newDecks} دەستەی نوێ • ${s.matchedDecks} دەستەی ئێستا دۆزرایەوە${s.deckConflicts ? ' • ' + s.deckConflicts + ' ناکۆکی id ی دەستە (وەک دەستەی نوێ)' : ''}\n` +
+                `• ${s.rejected} ڕیزی نادروست ڕەتکرایەوە\n\nهیچ کارت/XP/ڕێکخستنێکی ئێستا ناسڕێتەوە. بەردەوام بیت؟`;
+            if (!confirm(msg)) { toast('هاوردەکردن هەڵوەشێنرایەوە — هیچ گۆڕانکارییەک نەکرا'); return; }
             state = work;
-            normalizeSettings();
-            ensureDecks();
-            normalizeSession();
-            await save();
-            renderHome();
-            syncSettingsUI();
-            renderDeckManagerUI();
-            toast(`✅ هاوردە کرا: ${stats.newCards} کارتی نوێ، ${stats.dupes} یەکخرایەوە`);
+            normalizeSettings(); ensureDecks(); normalizeSession();
+            const ok = await save();
+            if (!ok) { // نووسین شکستی هێنا: state ی پێشوو دەگەڕێتەوە (هەوڵی ناو-بیرگە؛ نەک گەرەنتی بۆ هەموو جۆرە storage ـێک)
+                state = prev;
+                throw Object.assign(new Error('save failed'), { saveFailed: true });
+            }
+            renderHome(); syncSettingsUI(); renderDeckManagerUI();
+            if (document.getElementById('manage').classList.contains('active')) renderManage();
+            toast(`✅ هاوردە کرا: ${s.newCards} کارتی نوێ، ${s.matchedById + s.matchedByContent} کارتی ئێستا، ${s.newDecks} دەستەی نوێ`);
         } catch (err) {
-            // FEATURE: ئەگەر هەڵە ڕوویدا، هیچ شتێک پاشەکەوت نەکراوە و کۆپی ئاسایشەکە دەگەڕێتەوە
-            console.error('Import merge failed, restoring backup:', err);
-            state = backup;
+            console.error('Import failed, state unchanged:', err);
+            if (state !== prev) state = prev;
             try { renderHome(); syncSettingsUI(); renderDeckManagerUI(); } catch (_) {}
-            toast('❌ فایلەکە دروست نییە یان تێکچووە — هیچ گۆڕانکارییەک پاشەکەوت نەکرا');
-        }
+            toast(err && err.saveFailed ? '❌ پاشەکەوتکردن سەرنەکەوت — هاوردەکردن جێبەجێ نەکرا و داتای پێشوو ماوە'
+                                         : '❌ فایلەکە دروست نییە یان تێکچووە — هیچ گۆڕانکارییەک نەکرا');
+        } finally { importInFlight = false; }
     };
-    reader.onerror = () => toast('❌ هەڵە لە خوێندنەوەی فایل');
     reader.readAsText(file);
-    e.target.value = '';
 }
 
 function wipeData() {
