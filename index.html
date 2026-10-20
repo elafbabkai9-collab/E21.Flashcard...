@@ -285,6 +285,7 @@ hr.sep { border: none; border-top: 1px solid var(--line); margin: 22px 0; }
             <div class="stat"><b id="count-studytime">0:00</b><span>کاتی خوێندنی ئەمڕۆ</span></div>
             <div class="stat" style="cursor:pointer;" onclick="goToDifficultWords()"><b id="count-difficult">0</b><span>🔥 وشە سەختەکان</span></div>
         </div>
+        <div id="global-review-wrap"></div> <!-- FEATURE: دوگمەی پێداچوونەوەی گشتی -->
         <div id="deck-list" class="grid"></div>
     </section>
 
@@ -302,6 +303,7 @@ hr.sep { border: none; border-top: 1px solid var(--line); margin: 22px 0; }
             <div id="card-obj" class="card" onclick="flipCard()">
                 <div class="inner">
                     <div class="face" id="face-front">
+                        <div id="front-deck-tag" style="display:none; font-size: 11px; color: var(--accent); margin-bottom: 8px;"></div>
                         <div style="font-size: 12px; color: var(--muted); letter-spacing: 2px;" id="q-lang">ENGLISH</div>
                         <div class="big-text" id="q-text">Word</div>
                         <div class="sub-text" id="q-extra"></div>
@@ -309,6 +311,7 @@ hr.sep { border: none; border-top: 1px solid var(--line); margin: 22px 0; }
                         <div style="margin-top: 16px; font-size: 12px; color: #aaa;">بۆ بینینی وەڵام کلیک بکە</div>
                     </div>
                     <div class="face back" id="face-back">
+                        <div id="back-deck-tag" style="display:none; font-size: 11px; color: var(--muted); margin-bottom: 8px;"></div>
                         <div style="font-size: 12px; color: var(--accent);" id="a-lang">کوردی</div>
                         <div class="big-text" id="a-text">وشە</div>
                         <div id="back-extra"></div>
@@ -610,6 +613,41 @@ function ensureDecks() {
     state.cards.forEach(c => { if (!c.deckId || !validIds.has(c.deckId)) c.deckId = state.decks[0].id; });
 }
 
+// FIX (Global Review): پێشتر session.queue کۆپیی ئۆبجێکتی کارت بوو و دوای save/load لە state.cards جیا دەبووەوە.
+// ئێستا queue تەنها لیستی id ـە. ئەم فەنکشنە queue ی کۆنیش دەگۆڕێت بۆ id و کارتی سڕاوە دەپەڕێنێت.
+function normalizeSession() {
+    const s = state.session = state.session || {};
+    const valid = new Set(state.cards.map(c => c.id));
+    const idx = Number.isFinite(Number(s.currentIndex)) ? Number(s.currentIndex) : 0;
+    const out = [];
+    let newIdx = 0;
+    (Array.isArray(s.queue) ? s.queue : []).forEach((item, i) => {
+        const id = (item && typeof item === 'object') ? item.id : item;
+        if (valid.has(id)) { out.push(id); if (i < idx) newIdx++; }
+    });
+    s.queue = out;
+    s.currentIndex = newIdx;
+    if (s.deckId === undefined) s.deckId = null;
+    s.global = !!s.global;
+    s.cardsSinceQuote = s.cardsSinceQuote || 0;
+}
+
+// FIX: کارتی ڕاستەقینە لە state.cards بەپێی id دەدۆزرێتەوە؛ کارتی سڕاوە دەپەڕێنرێت
+function cardById(id) { return state.cards.find(c => c.id === id) || null; }
+function currentSessionCard() {
+    const s = state.session;
+    while (s.currentIndex < s.queue.length) {
+        const c = cardById(s.queue[s.currentIndex]);
+        if (c) return c;
+        s.currentIndex++; // کارتەکە سڕاوەتەوە
+    }
+    return null;
+}
+
+// FIX: پێناسەی یەکگرتووی "چاوەڕوانی پێداچوونەوە" و "کارتی نوێ" — Home و startStudy و startGlobalStudy هەموو ئەمە بەکاردەهێنن
+function isDueReview(c, now) { return (c.reviewCount || 0) > 0 && c.due <= now; }
+function isNewCard(c) { return (c.reviewCount || 0) === 0; }
+
 /* ---------------- toast ---------------- */
 function toast(msg) {
     const wrap = document.getElementById('toast-wrap');
@@ -700,6 +738,7 @@ async function load() {
                 normalizeSettings();
                 // MIGRATION: کارتە کۆنەکان (بەپێی level) دەگۆڕدرێن بۆ فۆرماتی SRS v2، بەبێ لەدەستدانی هیچ داتایەک
                 state.cards = state.cards.map(migrateCard).map(sanitizeCard);
+                normalizeSession(); // FIX: queue ببێتە لیستی id
             }
         }
     } catch (err) {
@@ -1115,7 +1154,14 @@ function renderHome() {
     renderMissions();
 
     // --- ستاتیستیکی داشبۆرد ---
-    document.getElementById('count-due').innerText = state.cards.filter(c => c.due <= now).length;
+    // FIX: چاوەڕوانی پێداچوونەوە = reviewCount > 0 && due <= now؛ کارتە نوێیەکان بە جیا دەژمێردرێن
+    const dueTotal = state.cards.filter(c => isDueReview(c, now)).length;
+    const newTotal = state.cards.filter(isNewCard).length;
+    document.getElementById('count-due').innerText = dueTotal;
+    // FEATURE (Global Review): دوگمەی پێداچوونەوەی گشتی
+    const globalWrap = document.getElementById('global-review-wrap');
+    if (globalWrap) globalWrap.innerHTML = state.cards.length === 0 ? '' :
+        `<button class="btn-play" style="margin: 0 0 16px;" onclick="startGlobalStudy()">🌍 پێداچوونەوەی گشتی — ${dueTotal} پێداچوونەوە • ${newTotal} نوێ</button>`;
     document.getElementById('count-reviews-today').innerText = rec.reviews;
     document.getElementById('count-new-today').innerText = rec.newCards;
     document.getElementById('count-streak').innerText = state.progress.streak || 0;
@@ -1139,10 +1185,11 @@ function renderHome() {
         if (deckCards.length === 0) return; // دەستەی بەتاڵ لێرە نیشان نادرێت (بەڵام لە بەشی زیادکردندا دەردەکەوێت)
         const deckMastered = deckCards.filter(c => c.status === 'mastered').length;
         const pct = (deckMastered / deckCards.length) * 100;
-        const dueCount = deckCards.filter(c => c.due <= now).length;
+        const dueCount = deckCards.filter(c => isDueReview(c, now)).length; // FIX
+        const newCount = deckCards.filter(isNewCard).length; // FIX
         const div = document.createElement('div');
         div.className = 'deck';
-        div.innerHTML = `<h3>🗂 ${escapeHtml(deck.name)}</h3><p style="font-size: 13px; color: var(--muted)">${deckCards.length} کارت • ${dueCount} پێداچوونەوە${deckMastered ? ' • ' + deckMastered + ' فێربوو' : ''}</p><div class="progress-mini"><div class="progress-bar" style="width: ${pct}%"></div></div><button class="btn-play" onclick="startStudy('${deck.id}')">دەستپێکردن</button>`;
+        div.innerHTML = `<h3>🗂 ${escapeHtml(deck.name)}</h3><p style="font-size: 13px; color: var(--muted)">${deckCards.length} کارت • ${dueCount} پێداچوونەوە • ${newCount} نوێ${deckMastered ? ' • ' + deckMastered + ' فێربوو' : ''}</p><div class="progress-mini"><div class="progress-bar" style="width: ${pct}%"></div></div><button class="btn-play" onclick="startStudy('${deck.id}')">دەستپێکردن</button>`;
         deckList.appendChild(div);
     });
 }
@@ -1172,9 +1219,9 @@ function startStudy(deckId) {
     // BUG FIX (Critical, Phase 7): پێشتر کارتی "mastered" بۆ هەمیشە لە خولی خوێندن دەردەچوو.
     // بەڕاستی mastered واتای "هەرگیز پێداچوونەوەی نەکەیت" نییە، واتای "متمانەیەکی بەرز و
     // ماوەیەکی درێژە" — بۆیە دەبێت کاتێک وادەی هات دووبارە بێتەوە، تەنها بە دەم-دەمی.
-    const dueReviews = deckCards.filter(c => (c.reviewCount || 0) > 0 && c.due <= now)
+    const dueReviews = deckCards.filter(c => isDueReview(c, now)) // FIX: پێناسەی یەکگرتوو
         .sort((a, b) => cardPriorityScore(b, now) - cardPriorityScore(a, now));
-    const newCards = deckCards.filter(c => (c.reviewCount || 0) === 0).slice(0, NEW_CARDS_PER_SESSION_CAP);
+    const newCards = deckCards.filter(isNewCard).slice(0, NEW_CARDS_PER_SESSION_CAP);
 
     let queue = dueReviews.concat(newCards).slice(0, STUDY_SESSION_CAP);
     let studyingAhead = false;
@@ -1188,10 +1235,113 @@ function startStudy(deckId) {
         studyingAhead = true;
     }
 
-    state.session.queue = queue;
+    state.session.queue = queue.map(c => c.id); // FIX: تەنها id ی کارتەکان
     state.session.currentIndex = 0;
     state.session.deckId = deckId;
+    state.session.global = false;
     state.session.cardsSinceQuote = 0; // FEATURE (Motivation Engine)
+    showV('study');
+    renderCard();
+    startStudyTimer();
+    if (studyingAhead) toast('🎉 هیچ کارتێک ئەمڕۆ چاوەڕوان نییە — خوێندنی پێشوەخت دەکەیت');
+}
+
+// FEATURE (Global Review): کارتەکانی یەک دەستە لەسەر یەک ناخرێن؛ دەستی ئەو کارتانە دەگۆڕدرێت کە لە ڕیزدا یەک دوای یەکن
+function spreadByDeck(list, prevDeckId) {
+    const rest = list.slice(), out = [];
+    let last = prevDeckId;
+    while (rest.length) {
+        let i = rest.findIndex(c => c.deckId !== last);
+        if (i === -1) i = 0;
+        const c = rest.splice(i, 1)[0];
+        out.push(c);
+        last = c.deckId;
+    }
+    return out;
+}
+
+// FEATURE: کارتی نوێ بە نۆرە لە هەر دەستەیەک هەڵدەبژێرێت (دەستی دەستپێک بە هەڕەمەکی دەگۆڕێت)
+function roundRobinByDeck(cards, limit) {
+    const groups = new Map();
+    cards.forEach(c => { if (!groups.has(c.deckId)) groups.set(c.deckId, []); groups.get(c.deckId).push(c); });
+    const lists = Array.from(groups.values());
+    if (lists.length > 1) lists.push(...lists.splice(0, Math.floor(Math.random() * lists.length)));
+    const out = [];
+    for (let r = 0; out.length < limit && lists.some(l => l.length > r); r++) {
+        for (const l of lists) { if (l[r] && out.length < limit) out.push(l[r]); }
+    }
+    return out;
+}
+
+// FEATURE: هەر ٣-٤ پێداچوونەوە کارتێکی نوێ دەخرێتە نێوانیان (نەک هەموویان لە کۆتایی)
+function interleaveNew(reviews, fresh) {
+    const out = [], pool = fresh.slice();
+    let since = 0, gap = 3;
+    const takeNew = (prev, next) => {
+        let i = pool.findIndex(c => c.deckId !== prev && c.deckId !== next);
+        if (i === -1) i = pool.findIndex(c => c.deckId !== prev);
+        if (i === -1) i = 0;
+        return pool.splice(i, 1)[0];
+    };
+    reviews.forEach((r, idx) => {
+        out.push(r);
+        since++;
+        if (pool.length && since >= gap) {
+            out.push(takeNew(r.deckId, reviews[idx + 1] && reviews[idx + 1].deckId));
+            since = 0;
+            gap = gap === 3 ? 4 : 3;
+        }
+    });
+    while (pool.length) out.push(pool.shift()); // ئەگەر پێداچوونەوە کەم بوو، کارتە نوێیەکانی ماوە لە کۆتاییدا
+    return out;
+}
+
+// FEATURE: کۆتایی هێنان بە خول بە پەیامێکی ڕوون (نەگەڕانەوە بۆ home بەبێ ڕوونکردنەوە)
+function finishStudySession(msg) {
+    stopStudyTimer();
+    stopAutoRepeat();
+    toast(msg);
+    showV('home');
+}
+
+// FEATURE (Global Review): پێداچوونەوەی گشتی لەسەر هەموو دەستەکان
+function startGlobalStudy() {
+    const now = Date.now();
+    if (state.cards.length === 0) { toast('هیچ کارتێک نییە بۆ پێداچوونەوە'); return; }
+
+    // ١) کارتی "دووبارە" ی ئەم نزیکانە (learning، due لە ٥ خولەکی ڕابردوو)
+    const lapsed = state.cards
+        .filter(c => isDueReview(c, now) && c.status === 'learning' && c.due >= now - 5 * 60 * 1000)
+        .sort((a, b) => a.due - b.due)
+        .slice(0, STUDY_SESSION_CAP);
+    const lapsedIds = new Set(lapsed.map(c => c.id));
+    // ٢) پێداچوونەوە دواکەوتووەکان بەپێی cardPriorityScore
+    const overdue = state.cards
+        .filter(c => isDueReview(c, now) && !lapsedIds.has(c.id))
+        .sort((a, b) => cardPriorityScore(b, now) - cardPriorityScore(a, now))
+        .slice(0, STUDY_SESSION_CAP - lapsed.length);
+
+    const lapsedMixed = spreadByDeck(lapsed, null);
+    const overdueMixed = spreadByDeck(overdue, lapsedMixed.length ? lapsedMixed[lapsedMixed.length - 1].deckId : null);
+    const reviews = lapsedMixed.concat(overdueMixed);
+
+    // ٣) کارتی نوێ، بە سنووری NEW_CARDS_PER_SESSION_CAP و STUDY_SESSION_CAP، لە نێوان پێداچوونەوەکاندا
+    const newRoom = Math.min(NEW_CARDS_PER_SESSION_CAP, STUDY_SESSION_CAP - reviews.length);
+    const fresh = newRoom > 0 ? roundRobinByDeck(state.cards.filter(isNewCard), newRoom) : [];
+    let queue = interleaveNew(reviews, fresh);
+    let studyingAhead = false;
+
+    if (queue.length === 0) {
+        // هەمان ڕەفتاری startStudy: هیچ شتێک چاوەڕوان نییە، خوێندنی پێشوەخت (ئارەزوومەندانە)
+        queue = spreadByDeck(state.cards.slice().sort((a, b) => a.due - b.due).slice(0, STUDY_SESSION_CAP), null);
+        studyingAhead = true;
+    }
+
+    state.session.queue = queue.map(c => c.id);
+    state.session.currentIndex = 0;
+    state.session.deckId = null;
+    state.session.global = true;
+    state.session.cardsSinceQuote = 0;
     showV('study');
     renderCard();
     startStudyTimer();
@@ -1388,12 +1538,20 @@ const ENGLISH_EXTRA_HTML = `
 `;
 
 function renderCard() {
-    const card = state.session.queue[state.session.currentIndex];
-    if (!card) { showV('home'); return; }
+    const card = currentSessionCard(); // FIX: لە state.cards بەپێی id
+    if (!card) { finishStudySession('⚠️ کارتێکی تر لەم خولەدا نەماوە (ڕەنگە سڕابنەوە) — گەڕایتەوە بۆ سەرەکی'); return; }
     const total = state.session.queue.length, currentNum = state.session.currentIndex + 1;
     const reversed = state.settings.dir === 'ku'; // ENHANCEMENT: ئاراستەی خوێندنی گۆڕاو
 
-    document.getElementById('study-deck-name').innerText = (state.decks.find(d => d.id === state.session.deckId) || {}).name || 'دەستە';
+    // FEATURE (Global Review): لە مۆدی گشتیدا سەردێڕ "پێداچوونەوەی گشتی"یە و ناوی دەستەی کارتەکە لەسەر کارتەکە پیشان دەدرێت
+    document.getElementById('study-deck-name').innerText = state.session.global
+        ? '🌍 پێداچوونەوەی گشتی'
+        : ((state.decks.find(d => d.id === state.session.deckId) || {}).name || 'دەستە');
+    const deckTagText = state.session.global ? '🗂 ' + ((state.decks.find(d => d.id === card.deckId) || {}).name || 'دەستە') : '';
+    ['front-deck-tag', 'back-deck-tag'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.innerText = deckTagText; el.style.display = deckTagText ? 'block' : 'none'; }
+    });
     document.getElementById('study-progress-text').innerText = `${currentNum} / ${total}`;
     document.getElementById('study-progress-bar').style.width = `${(currentNum / total) * 100}%`;
 
@@ -1529,8 +1687,8 @@ function updateStreak(rec) {
 }
 
 function submitRate(rating) {
-    const card = state.session.queue[state.session.currentIndex];
-    if (!card) return;
+    const card = currentSessionCard(); // FIX: لە state.cards بەپێی id
+    if (!card) { finishStudySession('⚠️ کارتێکی تر لەم خولەدا نەماوە — گەڕایتەوە بۆ سەرەکی'); return; }
     // BUG FIX (Critical): پێشتر دەکرا هەڵسەنگاندن بدرێت بەبێ ئەوەی کارتەکە بگۆڕدرێت و
     // وەڵامەکە ببینرێت — ئەمە خۆی دژی بنەمای Active Recall بوو، هەروەها ئەگەر بەخێرایی
     // دوو جار کلیک بکرایە دەکرا کارتی داهاتوو بەبێ بینین هەڵسەنگێندرێت.
@@ -1546,7 +1704,7 @@ function submitRate(rating) {
     if (requeue) {
         const REQUEUE_GAP = 5;
         const insertAt = Math.min(state.session.queue.length, state.session.currentIndex + 1 + REQUEUE_GAP);
-        state.session.queue.splice(insertAt, 0, card);
+        state.session.queue.splice(insertAt, 0, card.id); // FIX: id نەک ئۆبجێکت
     }
 
     awardXpForReview(card, rating);
@@ -1556,10 +1714,7 @@ function submitRate(rating) {
     state.session.currentIndex++;
     save();
     if (state.session.currentIndex >= state.session.queue.length) {
-        stopStudyTimer();
-        stopAutoRepeat();
-        toast('🎉 ئەم دەستەیە تەواو بوو!');
-        showV('home');
+        finishStudySession(state.session.global ? '🎉 پێداچوونەوەی گشتی تەواو بوو!' : '🎉 ئەم دەستەیە تەواو بوو!');
         return;
     }
 
@@ -1619,7 +1774,7 @@ function speakText(text) {
 
 function speak(e) {
     e.stopPropagation();
-    const card = state.session.queue[state.session.currentIndex];
+    const card = currentSessionCard(); // FIX
     if (!card) return;
     speakText(card.en);
 }
@@ -1637,7 +1792,7 @@ function isEnglishShowingNow() {
 function maybeAutoPlayEnglish() {
     stopAutoRepeat();
     if (!state.settings.autoPlay) return;
-    const card = state.session.queue[state.session.currentIndex];
+    const card = currentSessionCard(); // FIX
     if (!card) return;
     speakText(card.en);
     if (state.settings.autoRepeat) {
@@ -1966,29 +2121,144 @@ function exportData() {
 
 function triggerImport() { document.getElementById('file-input').click(); }
 
+// FEATURE (Merge Import): هاوردەکردنی داتا ئێستا Merge ـە نەک Replace — هیچ کارت و پێشکەوتنێکی ئێستا ناسڕێتەوە
+const SCHEDULE_FIELDS = ['easeFactor', 'interval', 'difficulty', 'stability', 'reviewCount', 'failCount', 'lastReviewDate', 'due', 'status', 'masteredDate'];
+const DAILY_NUM_FIELDS = ['reviews', 'newCards', 'studyMs', 'pomodoros'];
+
+// FEATURE: هەمان کلیلی showImportPreview بۆ دۆزینەوەی دووبارە
+function cardDupKey(c) { return String(c.en || '').trim().toLowerCase() + '|' + String(c.ku || '').trim().toLowerCase(); }
+
+// FEATURE: ئایا کارتی a پێشکەوتنی زیاترە لە b؟ (reviewCount ی زیاتر، یاخود lastReviewDate ی نوێتر)
+function isMoreProgressed(a, b) {
+    const ra = Number(a.reviewCount) || 0, rb = Number(b.reviewCount) || 0;
+    if (ra !== rb) return ra > rb;
+    return (Number(a.lastReviewDate) || 0) > (Number(b.lastReviewDate) || 0);
+}
+
+// FEATURE: داتای فایلەکە دەخاتە سەر `work` (کۆپییەکی جیا لە state) و ئامارەکان دەگەڕێنێتەوە
+function mergeBackupInto(work, parsed) {
+    const now = Date.now();
+    const stats = { newCards: 0, dupes: 0, newDecks: 0 };
+    const num = v => (Number.isFinite(Number(v)) ? Number(v) : 0);
+
+    // --- دەستەکان: بەپێی id یاخود ناو (بێ گرنگی بە پیتی گەورە/بچووک) یەکیان دەکەینەوە ---
+    if (!Array.isArray(work.decks) || work.decks.length === 0) work.decks = [{ id: 'default', name: 'دەستەی سەرەکی', created: now }];
+    const usedDeckIds = new Set(work.decks.map(d => d.id));
+    const deckIdMap = new Map(); // id ی دەستەی فایل → id ی دەستەی یەکخراو
+    (Array.isArray(parsed.decks) ? parsed.decks : []).forEach(d => {
+        if (!d || typeof d !== 'object') return;
+        const name = String(d.name == null ? '' : d.name).trim();
+        let target = (d.id != null && work.decks.find(x => x.id === d.id))
+            || (name && work.decks.find(x => String(x.name).trim().toLowerCase() === name.toLowerCase()));
+        if (!target) {
+            let id = (d.id != null && !usedDeckIds.has(d.id)) ? d.id : null;
+            while (id == null || usedDeckIds.has(id)) id = 'deck_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+            target = { id, name: name || 'دەستە', created: num(d.created) || now };
+            work.decks.push(target);
+            usedDeckIds.add(id);
+            stats.newDecks++;
+        }
+        if (d.id != null) deckIdMap.set(d.id, target.id);
+    });
+    const mainDeck = work.decks.find(d => d.id === 'default') || work.decks[0];
+
+    // --- کارتەکان ---
+    const existing = new Map(), usedIds = new Set();
+    work.cards.forEach(c => { usedIds.add(c.id); const k = cardDupKey(c); if (!existing.has(k)) existing.set(k, c); });
+    (parsed.cards || []).forEach(raw => {
+        if (!raw || typeof raw !== 'object') return;
+        const inc = sanitizeCard(migrateCard(Object.assign({}, raw)));
+        const key = cardDupKey(inc);
+        if (key === '|') return; // ڕیزی بەتاڵ
+        const hit = existing.get(key);
+        if (hit) {
+            // کارتی دووبارە: ئەوەی پێشکەوتنی زیاترە دەمێنێت، بەبێ تێکەڵکردنی خانەکانی SM-2
+            stats.dupes++;
+            if (isMoreProgressed(inc, hit)) {
+                SCHEDULE_FIELDS.forEach(f => { if (inc[f] !== undefined) hit[f] = inc[f]; else delete hit[f]; });
+            }
+            if (!hit.mn && inc.mn) hit.mn = inc.mn;
+        } else {
+            let did = deckIdMap.get(inc.deckId);
+            if (!did && inc.deckId != null && usedDeckIds.has(inc.deckId)) did = inc.deckId;
+            inc.deckId = did || mainDeck.id;
+            const okType = typeof inc.id === 'number' || typeof inc.id === 'string';
+            while (!okType || inc.id == null || usedIds.has(inc.id) || typeof inc.id === 'boolean') {
+                inc.id = Date.now() + Math.random();
+                if (!usedIds.has(inc.id)) break;
+            }
+            usedIds.add(inc.id);
+            work.cards.push(inc);
+            existing.set(key, inc);
+            stats.newCards++;
+        }
+    });
+
+    // --- progress: max (نەک کۆکردنەوە) ---
+    const pa = work.progress = work.progress || { xp: 0, streak: 0, bestStreak: 0, lastStudyDate: null, daily: {}, totalPomodoros: 0 };
+    const pb = (parsed.progress && typeof parsed.progress === 'object') ? parsed.progress : {};
+    pa.xp = Math.max(num(pa.xp), num(pb.xp));
+    pa.bestStreak = Math.max(num(pa.bestStreak), num(pb.bestStreak));
+    pa.totalPomodoros = Math.max(num(pa.totalPomodoros), num(pb.totalPomodoros));
+    const da = pa.lastStudyDate || '', db = (typeof pb.lastStudyDate === 'string' && pb.lastStudyDate) ? pb.lastStudyDate : '';
+    if (db > da) { pa.lastStudyDate = db; pa.streak = num(pb.streak); }       // فایلەکە نوێترە
+    else if (db && db === da) pa.streak = Math.max(num(pa.streak), num(pb.streak));
+    pa.bestStreak = Math.max(pa.bestStreak, num(pa.streak));
+
+    if (!pa.daily || typeof pa.daily !== 'object') pa.daily = {};
+    const dailyB = (pb.daily && typeof pb.daily === 'object') ? pb.daily : {};
+    Object.keys(dailyB).forEach(day => {
+        const rb = dailyB[day];
+        if (!rb || typeof rb !== 'object') return;
+        const ra = pa.daily[day] || (pa.daily[day] = { reviews: 0, newCards: 0, studyMs: 0, pomodoros: 0 });
+        DAILY_NUM_FIELDS.forEach(f => { ra[f] = Math.max(num(ra[f]), num(rb[f])); });
+        // ئەرکی تەواوبوو (OR) و XP ی ڕۆژانەی هەر کارتێک (max) — بۆ ئەوەی XP ی ئەرک دووبارە نەدرێتەوە
+        if (rb.missionsCompleted && typeof rb.missionsCompleted === 'object') {
+            ra.missionsCompleted = ra.missionsCompleted || {};
+            Object.keys(rb.missionsCompleted).forEach(m => { if (rb.missionsCompleted[m]) ra.missionsCompleted[m] = true; });
+        }
+        if (rb.cardXpCount && typeof rb.cardXpCount === 'object') {
+            ra.cardXpCount = ra.cardXpCount || {};
+            Object.keys(rb.cardXpCount).forEach(k => { ra.cardXpCount[k] = Math.max(num(ra.cardXpCount[k]), num(rb.cardXpCount[k])); });
+        }
+    });
+
+    // settings: هی ئێستا دەمێنێت. session: ڕێکدەخرێتەوە و queue ی کۆن پاک دەکرێتەوە
+    work.session = { queue: [], currentIndex: 0, deckId: null, global: false, cardsSinceQuote: 0 };
+    return stats;
+}
+
 function handleFile(e) {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = async (event) => {
+        // FEATURE: کۆپییەکی ئاسایش لە state ی ئێستا لە ناو ڕەم، پێش هەر گۆڕانکارییەک
+        const backup = JSON.parse(JSON.stringify(state));
         try {
             const parsed = JSON.parse(event.target.result);
-            // FIX: پێشتر هیچ سەلماندنێک نەدەکرا؛ فایلێکی خراپ کراش دەکرد یان داتای هەڵە دادەنا.
             if (!parsed || !Array.isArray(parsed.cards)) throw new Error('invalid format');
-            state = parsed;
-            if (!state.settings) state.settings = { voice: 'en-US', dir: 'en', rate: 1, autoPlay: false, autoRepeat: false };
-            if (!state.session) state.session = { queue: [], currentIndex: 0, deckId: null, cardsSinceQuote: 0 };
-            if (!state.progress) state.progress = { xp: 0, streak: 0, bestStreak: 0, lastStudyDate: null, daily: {}, totalPomodoros: 0 };
+            const work = JSON.parse(JSON.stringify(state)); // Merge لەسەر کۆپی دەکرێت، state تا دڵنیابوونەوە دەست لێ نادرێت
+            const stats = mergeBackupInto(work, parsed);
+            if (!confirm(`${stats.newCards} کارتی نوێ، ${stats.dupes} دووبارە (یەکخرانەوە)، ${stats.newDecks} دەستەی نوێ — بەردەوام بیت؟`)) {
+                toast('هاوردەکردن هەڵوەشێنرایەوە — هیچ گۆڕانکارییەک نەکرا');
+                return;
+            }
+            state = work;
             normalizeSettings();
-            state.cards = state.cards.map(migrateCard).map(sanitizeCard);
             ensureDecks();
+            normalizeSession();
             await save();
             renderHome();
             syncSettingsUI();
             renderDeckManagerUI();
-            toast('✅ داتاکان هاوردە کران');
+            toast(`✅ هاوردە کرا: ${stats.newCards} کارتی نوێ، ${stats.dupes} یەکخرایەوە`);
         } catch (err) {
-            toast('❌ فایلەکە دروست نییە یان تێکچووە');
+            // FEATURE: ئەگەر هەڵە ڕوویدا، هیچ شتێک پاشەکەوت نەکراوە و کۆپی ئاسایشەکە دەگەڕێتەوە
+            console.error('Import merge failed, restoring backup:', err);
+            state = backup;
+            try { renderHome(); syncSettingsUI(); renderDeckManagerUI(); } catch (_) {}
+            toast('❌ فایلەکە دروست نییە یان تێکچووە — هیچ گۆڕانکارییەک پاشەکەوت نەکرا');
         }
     };
     reader.onerror = () => toast('❌ هەڵە لە خوێندنەوەی فایل');
