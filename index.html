@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080f1a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="E21">
+<script>if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) { window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); }); }</script>
 <title>E21Flashcard — English ↔ کوردی</title>
 <style>
 :root {
@@ -423,6 +431,34 @@ header { margin: 0 -16px 14px; }
 nav { -webkit-mask-image: linear-gradient(to right, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%); mask-image: linear-gradient(to right, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%); }
 #goal-group { width: 100%; }
 #goal-group .radio-pill { flex: 1 1 30%; text-align: center; }
+
+/* ===== فلاشکارت: ڕەنگی off-white نەرم ===== */
+.face { background: #e8ecf3; color: #1b2640; box-shadow: 0 14px 32px -18px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(27,38,64,0.08); }
+.lang-tag { background: #d9e0ec; color: #51607d; }
+.deck-tag { color: #7b88a3; }
+.speak-btn { background: #d3def2; color: #1f4fbf; }
+.speak-btn:active, .speak-btn.on { background: #bccbe9; }
+.sub-text { color: #5b6985; }
+.mn-box { background: #dce3ef; color: #2c3a57; }
+.mn-ico { background: #c5d3ee; }
+/* ===== دەستە: ڕیزی بچووک + فایل ===== */
+.deck.deck-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+.deck-row .dr-main { flex: 1; min-width: 0; }
+.deck-row h3 { font-size: 16px; margin: 0 0 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.deck-row p { margin: 0 0 8px; font-size: 12px; }
+.deck-row .progress-mini { margin: 0; height: 4px; }
+.deck-row .btn-play { width: auto; flex: none; margin: 0; padding: 10px 16px; font-size: 14px; }
+.folder { grid-column: 1 / -1; margin: 0; }
+.folder > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--panel); border: 1px solid var(--line-soft); border-radius: var(--radius); font-weight: 700; color: var(--white); }
+.folder > summary::-webkit-details-marker { display: none; }
+.folder .f-count { margin-inline-start: auto; color: var(--muted); font-size: 12px; font-weight: 500; }
+.folder .f-go { flex: none; width: auto; margin: 0; padding: 7px 14px; font-size: 13px; }
+.folder .f-body { display: grid; gap: 8px; padding: 8px 0 4px; }
+.folder-select { width: auto; max-width: 150px; padding: 8px 10px; font-size: 13px; }
+
+/* مینی-تایمەری پۆمۆدۆرۆ لەسەر ژمارەی کارتەکان نەکەوێت */
+.pomo-mini-badge { padding: 5px 12px; font-size: 12px; color: #fff; }
+body.focus-active #study-progress-text { margin-left: 92px; }
 </style>
 </head>
 <body>
@@ -563,7 +599,7 @@ nav { -webkit-mask-image: linear-gradient(to right, transparent 0, #000 14px, #0
                 <button class="icon-btn" onclick="pomoReset()">↺ ڕێستارت</button>
             </div>
             <div class="pomo-stats">🍅 ئەمڕۆ: <b id="pomo-today-count">0</b> • کۆی گشتی: <b id="pomo-total-count">0</b></div>
-            <div class="hint" style="margin-top:10px;">٢٥ خولەک خوێندن → ٥ خولەک پشوو، دوای ٤ جار پشووی ٣٠ خولەکە. هەر پۆمۆدۆرۆیەکی تەواوبوو ٥٠ XP دەدات.</div>
+            <div class="hint" style="margin-top:10px;">٢٥ خولەک خوێندن ← ٥ خولەک پشوو، دوای ٤ جار پشووی ٣٠ خولەکە. هەر پۆمۆدۆرۆیەکی تەواوبوو ٥٠ XP دەدات.</div>
         </div>
     </section>
 
@@ -670,8 +706,8 @@ nav { -webkit-mask-image: linear-gradient(to right, transparent 0, #000 14px, #0
             <div class="setting-row">
                 <label class="title">ئاراستە</label>
                 <div class="radio-group" id="dir-group">
-                    <div class="radio-pill" data-val="en" onclick="setDir('en')">English → کوردی</div>
-                    <div class="radio-pill" data-val="ku" onclick="setDir('ku')">کوردی → English</div>
+                    <div class="radio-pill" data-val="en" onclick="setDir('en')"><bdi dir="ltr">English → کوردی</bdi></div>
+                    <div class="radio-pill" data-val="ku" onclick="setDir('ku')"><bdi dir="ltr">کوردی → English</bdi></div>
                 </div>
             </div>
 
@@ -831,6 +867,9 @@ function ensureDecks() {
     if (!state.decks || state.decks.length === 0) {
         state.decks = [{ id: 'default', name: 'دەستەی سەرەکی', created: Date.now() }];
     }
+    if (!Array.isArray(state.folders)) state.folders = [];
+    const fIds = new Set(state.folders.map(f => f.id));
+    state.decks.forEach(d => { if (d.folderId && !fIds.has(d.folderId)) d.folderId = null; }); // تەنها نیشانەکە لادەبرێت، هیچ کارت و دەستەیەک ناسڕدرێتەوە
     const validIds = new Set(state.decks.map(d => d.id));
     state.cards.forEach(c => { if (!c.deckId || !validIds.has(c.deckId)) c.deckId = state.decks[0].id; });
 }
@@ -856,11 +895,17 @@ function normalizeSession() {
 
 // FIX: کارتی ڕاستەقینە لە state.cards بەپێی id دەدۆزرێتەوە؛ کارتی سڕاوە دەپەڕێنرێت
 function cardById(id) { return state.cards.find(c => c.id === id) || null; }
+// خولی فایل: کارتەکە دەبێت دەستەکەی لەو فایلەدا بێت
+function inSessionFolder(c, key) {
+    if (!String(key).startsWith('folder:')) return false;
+    const d = state.decks.find(x => x.id === c.deckId);
+    return !!d && d.folderId === String(key).slice(7);
+}
 function currentSessionCard() {
     const s = state.session;
     while (s.currentIndex < s.queue.length) {
         const c = cardById(s.queue[s.currentIndex]);
-        if (c && (s.global || !s.deckId || c.deckId === s.deckId)) return c; // کارتی گوازراوە بۆ دەستەیەکی تر لە خولی دەستەدا دەپەڕێنرێت
+        if (c && (s.global || !s.deckId || c.deckId === s.deckId || inSessionFolder(c, s.deckId))) return c; // کارتی گوازراوە بۆ دەستەیەکی تر لە خولی دەستەدا دەپەڕێنرێت
         s.currentIndex++; // کارتەکە سڕاوەتەوە
     }
     return null;
@@ -1112,7 +1157,7 @@ function sanitizeCard(c) {
         if (!Number.isFinite(n)) return fallback;
         return (min !== undefined) ? Math.max(min, n) : n;
     };
-    c.easeFactor = safeNum(c.easeFactor, 2.5, 1.3);
+    c.easeFactor = Math.min(MAX_EASE, safeNum(c.easeFactor, 2.5, 1.3));
     c.interval = safeNum(c.interval, 0, 0);
     c.reviewCount = safeNum(c.reviewCount, 0, 0);
     c.failCount = safeNum(c.failCount, 0, 0);
@@ -1188,11 +1233,12 @@ function renderDeckManagerUI() {
     if (!state.decks) return;
     const managerList = document.getElementById('deck-manager-list');
     if (managerList) {
-        managerList.innerHTML = state.decks.map(d => {
+        managerList.innerHTML = folderBlockHtml() + state.decks.map(d => {
             const count = state.cards.filter(c => c.deckId === d.id).length;
             return `<div class="manage-item">
                 <div style="color:white">🗂 ${escapeHtml(d.name)} <span style="color:var(--muted); font-size:12px;">(${count} کارت)</span></div>
                 <div class="manage-actions">
+                    <select class="folder-select" onchange="setDeckFolder('${d.id}', this.value)" aria-label="فایلی دەستە">${folderOptions(d.folderId)}</select>
                     <button class="icon-btn" onclick="handleRenameDeck('${d.id}')">دەستکاری ناو</button>
                     ${state.decks.length > 1 ? `<button class="icon-btn danger" onclick="deleteDeck('${d.id}')">سڕینەوە</button>` : ''}
                 </div>
@@ -1434,7 +1480,7 @@ function renderMissions() {
 
 /* ---------------- کورتەی ڕۆژانە + دەستکەوتەکان ---------------- */
 const WEEK_NAMES = ['یەکشەممە', 'دووشەممە', 'سێشەممە', 'چوارشەممە', 'پێنجشەممە', 'هەینی', 'شەممە'];
-const WEEK_LETTERS = ['ی', 'د', 'س', 'چ', 'پ', 'ه', 'ش']; // یەکشەممە ... شەممە
+const WEEK_LETTERS = ['یەک', 'دوو', 'سێ', 'چوار', 'پێنج', 'هەین', 'شەم']; // کورتکراوەی ناوی ڕۆژەکان: یەکشەممە ... شەممە // یەکشەممە ... شەممە
 const BADGES = [
     { icon: '🌱', t: 'یەکەم هەنگاو', k: 'reviews', goal: 1 },
     { icon: '📘', t: '100 پێداچوونەوە', k: 'reviews', goal: 100 },
@@ -1542,23 +1588,39 @@ function renderHome() {
     deckList.innerHTML = '';
 
     if (state.cards.length === 0) {
-        deckList.innerHTML = `<div class="deck" style="text-align:center; color: var(--muted); grid-column: 1/-1;">هێشتا هیچ کارتێکت زیاد نەکردووە.<br><br><button class="btn-play" style="width:auto; padding: 10px 20px;" onclick="showV('add')">زیادکردنی یەکەم کارت</button></div>`;
+        deckList.innerHTML = `<div class="deck" style="text-align:center; color: var(--muted); grid-column: 1/-1;">هێشتا هیچ کارتێکت زیاد نەکردووە.<br><span style="font-size:12px">ئەگەر پێشتر داتات لە وێبگەڕێکی تر هەبووە: ڕێکخستن ← داتا ← هاوردە</span><br><br><button class="btn-play" style="width:auto; padding: 10px 20px;" onclick="showV('add')">زیادکردنی یەکەم کارت</button></div>`;
         return;
     }
 
-    state.decks.forEach(deck => {
-        const deckCards = state.cards.filter(c => c.deckId === deck.id);
-        if (deckCards.length === 0) return; // دەستەی بەتاڵ لێرە نیشان نادرێت (بەڵام لە بەشی زیادکردندا دەردەکەوێت)
+    const deckRow = (deck, deckCards, label, key) => {
         const deckMastered = deckCards.filter(c => c.status === 'mastered').length;
         const pct = (deckMastered / deckCards.length) * 100;
-        const dueCount = deckCards.filter(c => isDueReview(c, now)).length; // FIX
-        const newCount = deckCards.filter(isNewCard).length; // FIX
+        const dueCount = deckCards.filter(c => isDueReview(c, now)).length;
+        const newCount = deckCards.filter(isNewCard).length;
         const laterCount = deckCards.filter(c => (c.reviewCount || 0) > 0 && c.due > now).length;
         const div = document.createElement('div');
-        div.className = 'deck';
-        div.innerHTML = `<h3>🗂 ${escapeHtml(deck.name)}</h3><p style="font-size: 13px; color: var(--muted)">${deckCards.length} کارت • ${dueCount} ئێستا • ${newCount} نوێ • ${laterCount} دواتر${deckMastered ? ' • ' + deckMastered + ' فێربوو' : ''}</p><div class="progress-mini"><div class="progress-bar" style="width: ${pct}%"></div></div><button class="btn-play" onclick="startStudy('${deck.id}')">دەستپێکردن</button>`;
-        deckList.appendChild(div);
+        div.className = 'deck deck-row';
+        div.innerHTML = `<div class="dr-main"><h3>🗂 ${escapeHtml(label)}</h3><p style="color: var(--muted)">${deckCards.length} کارت • ${dueCount} ئێستا • ${newCount} نوێ • ${laterCount} دواتر${deckMastered ? ' • ' + deckMastered + ' فێربوو' : ''}</p><div class="progress-mini"><div class="progress-bar" style="width: ${pct}%"></div></div></div><button class="btn-play" onclick="startStudy('${key}')">${canResume(key) ? 'بەردەوامبوون' : 'دەستپێکردن'}</button>`;
+        return div;
+    };
+    const shown = state.decks.filter(d => state.cards.some(c => c.deckId === d.id));
+    const placed = new Set();
+    state.folders.forEach(f => {
+        const ds = shown.filter(d => d.folderId === f.id);
+        if (!ds.length) return;
+        ds.forEach(d => placed.add(d.id));
+        const total = ds.reduce((n, d) => n + state.cards.filter(c => c.deckId === d.id).length, 0);
+        const det = document.createElement('details');
+        det.className = 'folder'; det.open = !closedFolders.has(f.id);
+        det.addEventListener('toggle', () => folderToggle(f.id, det.open));
+        const sum = document.createElement('summary');
+        sum.innerHTML = `<span>📁 ${escapeHtml(f.name)}</span><span class="f-count">${ds.length} دەستە • ${total} کارت</span><button class="btn-play f-go">${canResume('folder:' + f.id) ? 'بەردەوامبوون' : 'دەستپێکردن'}</button>`;
+        sum.querySelector('.f-go').addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); startStudy('folder:' + f.id); });
+        const body = document.createElement('div'); body.className = 'f-body';
+        ds.forEach(d => body.appendChild(deckRow(d, state.cards.filter(c => c.deckId === d.id), d.name, d.id)));
+        det.append(sum, body); deckList.appendChild(det);
     });
+    shown.filter(d => !placed.has(d.id)).forEach(d => deckList.appendChild(deckRow(d, state.cards.filter(c => c.deckId === d.id), d.name, d.id)));
 }
 
 /* ---------------- study ---------------- */
@@ -1578,9 +1640,73 @@ const STUDY_SESSION_CAP = 40;
 // زۆرترین ١٠ کارتی نوێ لەخۆدەگرێت.
 const NEW_CARDS_PER_SESSION_CAP = 10;
 
+/* ---------------- فایل (گروپی دەستەکان) ---------------- */
+const closedFolders = new Set();
+function folderOptions(sel) { return '<option value="">— بێ فایل —</option>' + state.folders.map(f => `<option value="${f.id}"${f.id === sel ? ' selected' : ''}>📁 ${escapeHtml(f.name)}</option>`).join(''); }
+function folderBlockHtml() {
+    const rows = state.folders.map(f => {
+        const n = state.decks.filter(d => d.folderId === f.id).length;
+        return `<div class="manage-item"><div style="color:white">📁 ${escapeHtml(f.name)} <span style="color:var(--muted); font-size:12px;">(${n} دەستە)</span></div>
+            <div class="manage-actions"><button class="icon-btn" onclick="renameFolder('${f.id}')">دەستکاری ناو</button><button class="icon-btn danger" onclick="deleteFolder('${f.id}')">سڕینەوە</button></div></div>`;
+    }).join('');
+    return `<div class="manage-item" style="display:block"><div style="font-weight:700; margin-bottom:8px; color:white">📁 فایلەکان</div>
+        <div style="display:flex; gap:8px;"><input id="new-folder-name" maxlength="100" placeholder="ناوی فایلی نوێ"><button class="primary" style="flex:none" onclick="createFolder()" aria-label="زیادکردنی فایل">+</button></div></div>${rows}`;
+}
+function folderCommit() { save(); renderHome(); renderDeckManagerUI(); }
+function createFolder() {
+    const inp = document.getElementById('new-folder-name'); const name = (inp.value || '').trim().slice(0, 100);
+    if (!name) { toast('ناوی فایل بنووسە'); return; }
+    state.folders.push({ id: 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, created: Date.now() });
+    folderCommit(); toast('✅ فایل دروستکرا: ' + name);
+}
+function renameFolder(id) {
+    const f = state.folders.find(x => x.id === id); if (!f) return;
+    const name = prompt('ناوی نوێی فایل:', f.name); if (name === null) return;
+    if (!name.trim()) { toast('ناوی فایل بەتاڵ نابێت'); return; }
+    f.name = name.trim().slice(0, 100); folderCommit();
+}
+function deleteFolder(id) {
+    if (!confirm('فایلەکە دەسڕدرێتەوە، بەڵام هەموو دەستە و کارتەکان وەک خۆیان دەمێننەوە. دڵنیایت؟')) return;
+    state.decks.forEach(d => { if (d.folderId === id) d.folderId = null; });
+    state.folders = state.folders.filter(f => f.id !== id); folderCommit();
+}
+function setDeckFolder(deckId, folderId) {
+    const d = state.decks.find(x => x.id === deckId); if (!d) return;
+    d.folderId = state.folders.some(f => f.id === folderId) ? folderId : null; folderCommit();
+}
+function folderToggle(id, open) { if (open) closedFolders.delete(id); else closedFolders.add(id); }
+
+/* ---------------- بەردەوامبوون لەو شوێنەی وەستاویت ---------------- */
+function canResume(key) {
+    const s = state.session || {};
+    if (!Array.isArray(s.queue) || !s.queue.length || !(s.currentIndex < s.queue.length) || s.day !== todayKey()) return false;
+    if (key === 'global') return !!s.global && !!currentSessionCard();
+    return !s.global && s.deckId === key && !!currentSessionCard();
+}
+function sessionTitle() {
+    const k = String(state.session.deckId || '');
+    if (k.startsWith('folder:')) return '📁 ' + ((state.folders.find(f => f.id === k.slice(7)) || {}).name || 'فایل');
+    return (state.decks.find(d => d.id === k) || {}).name || 'دەستە';
+}
+function resumeStudy() { showV('study'); renderCard(); startStudyTimer(); pomoAutoStart(true); toast('↩️ لەو شوێنەی وەستابوویت بەردەوام دەبیت'); }
+
+/* ---------------- 🧠 تەکنیکی یادگە: بە دوگمە دەکرێتەوە و دادەخرێت ---------------- */
+let mnOpen = false;
+const mnBtn = card => card.mn ? `<button class="speak-btn mn-toggle${mnOpen ? ' on' : ''}" onclick="toggleMn(event)" aria-label="تەکنیکی یادگە" aria-expanded="${mnOpen}">🧠</button>` : '';
+function applyMn(card) {
+    const box = document.getElementById('a-mn').closest('.mn-box');
+    box.style.display = (card && card.mn && mnOpen) ? '' : 'none';
+    document.querySelectorAll('.mn-toggle').forEach(b => { b.classList.toggle('on', mnOpen); b.setAttribute('aria-expanded', String(mnOpen)); });
+}
+function toggleMn(e) { e.stopPropagation(); mnOpen = !mnOpen; applyMn(currentSessionCard()); }
+
 function startStudy(deckId) {
     const now = Date.now();
-    const deckCards = state.cards.filter(c => c.deckId === deckId);
+    if (canResume(deckId)) { resumeStudy(); return; }
+    const folderId = String(deckId).startsWith('folder:') ? String(deckId).slice(7) : null;
+    const deckCards = folderId
+        ? state.cards.filter(c => { const d = state.decks.find(x => x.id === c.deckId); return d && d.folderId === folderId; })
+        : state.cards.filter(c => c.deckId === deckId);
     if (deckCards.length === 0) { toast('ئەم دەستەیە هیچ کارتێکی تێدا نییە'); return; }
 
     // BUG FIX (Critical, Phase 7): پێشتر کارتی "mastered" بۆ هەمیشە لە خولی خوێندن دەردەچوو.
@@ -1606,10 +1732,12 @@ function startStudy(deckId) {
     state.session.currentIndex = 0;
     state.session.deckId = deckId;
     state.session.global = false;
+    state.session.day = todayKey();
     state.session.cardsSinceQuote = 0; // FEATURE (Motivation Engine)
     showV('study');
     renderCard();
     startStudyTimer();
+    pomoAutoStart(true);
     if (studyingAhead) toast('🎉 هیچ کارتێک ئەمڕۆ چاوەڕوان نییە — خوێندنی پێشوەخت دەکەیت');
 }
 
@@ -1674,6 +1802,7 @@ function finishStudySession(msg) {
 // FEATURE (Global Review): پێداچوونەوەی گشتی لەسەر هەموو دەستەکان
 function startGlobalStudy() {
     const now = Date.now();
+    if (canResume('global')) { resumeStudy(); return; }
     if (state.cards.length === 0) { toast('هیچ کارتێک نییە بۆ پێداچوونەوە'); return; }
 
     // ١) کارتی "دووبارە" ی ئەم نزیکانە (learning، due لە ٥ خولەکی ڕابردوو)
@@ -1708,10 +1837,12 @@ function startGlobalStudy() {
     state.session.currentIndex = 0;
     state.session.deckId = null;
     state.session.global = true;
+    state.session.day = todayKey();
     state.session.cardsSinceQuote = 0;
     showV('study');
     renderCard();
     startStudyTimer();
+    pomoAutoStart(true);
     if (studyingAhead) toast('🎉 هیچ کارتێک ئەمڕۆ چاوەڕوان نییە — خوێندنی پێشوەخت دەکەیت');
 }
 
@@ -1790,8 +1921,21 @@ function pomoTick() {
     else renderPomodoro();
 }
 
-function pomoStart() {
+function studyViewActive() { return document.getElementById('study').classList.contains('active'); }
+function pomoStart() { // دوگمەی دەستی: تەنها لەناو کارتەکان کار دەکات
     if (pomodoro.running) return;
+    if (!studyViewActive()) { toast('🍅 پۆمۆدۆرۆ خۆکارانە دەستپێدەکات کاتێک دەچیتە ناو کارتەکان'); return; }
+    pomoBegin();
+}
+function pomoAutoStart(force) {
+    if (pomodoro.running) return;
+    if (pomodoro.phase !== 'idle' && pomodoro.phase !== 'focus') return; // لە کاتی پشوودا خۆی دەڕوات
+    if (pomodoro.userPaused && !force) return;
+    pomoBegin();
+}
+function pomoBegin() {
+    if (pomodoro.running) return;
+    pomodoro.userPaused = false;
     if (pomodoro.phase === 'idle') pomodoro.phase = 'focus';
     const secondsToRun = pomodoro.remainingOnPause != null ? pomodoro.remainingOnPause : phaseDuration(pomodoro.phase);
     pomodoro.endTime = Date.now() + secondsToRun * 1000;
@@ -1805,6 +1949,7 @@ function pomoStart() {
 function pomoPause() {
     if (!pomodoro.running) return;
     pomodoro.remainingOnPause = getSecondsLeft();
+    pomodoro.userPaused = true;
     pomodoro.running = false;
     clearInterval(pomodoro.intervalId);
     pomodoro.intervalId = null;
@@ -1844,6 +1989,13 @@ function pomoPhaseComplete(skipped) {
         }
     } else {
         pomodoro.phase = 'focus';
+        if (!studyViewActive()) { // پشوو تەواو بوو بەڵام لە کارتەکان نییت: چاوەڕێ دەکات تا دەچیتە ناو کارتەکان
+            clearInterval(pomodoro.intervalId); pomodoro.intervalId = null;
+            pomodoro.running = false; pomodoro.endTime = null; pomodoro.remainingOnPause = null;
+            toast('🍅 پشوو تەواو بوو — کاتێک دەچیتە ناو کارتەکان خوێندن دەستپێدەکات');
+            renderPomodoro();
+            return;
+        }
         toast('🍅 کاتی خوێندنە — وریابە!');
     }
     pomodoro.remainingOnPause = null;
@@ -1903,7 +2055,7 @@ function renderCard() {
     // FEATURE (Global Review): لە مۆدی گشتیدا سەردێڕ "پێداچوونەوەی گشتی"یە و ناوی دەستەی کارتەکە لەسەر کارتەکە پیشان دەدرێت
     document.getElementById('study-deck-name').innerText = state.session.global
         ? 'پێداچوونەوەی گشتی'
-        : ((state.decks.find(d => d.id === state.session.deckId) || {}).name || 'دەستە');
+        : sessionTitle();
     const deckTagText = state.session.global ? '🗂 ' + ((state.decks.find(d => d.id === card.deckId) || {}).name || 'دەستە') : '';
     ['front-deck-tag', 'back-deck-tag'].forEach(id => {
         const el = document.getElementById(id);
@@ -1922,11 +2074,11 @@ function renderCard() {
     const enSide = reversed ? 'back' : 'front', kuSide = reversed ? 'front' : 'back';
     document.getElementById(enSide + '-extra').innerHTML = ENGLISH_EXTRA_HTML;
     document.getElementById(kuSide + '-extra').innerHTML = '';
-    document.getElementById(enSide + '-speak').innerHTML = speakBtn('en');
+    document.getElementById(enSide + '-speak').innerHTML = speakBtn('en') + mnBtn(card);
     document.getElementById(kuSide + '-speak').innerHTML = hasVoice('ku') ? speakBtn('ku') : '';
     const mnEl = document.getElementById('a-mn');
     mnEl.innerText = card.mn || '';
-    mnEl.closest('.mn-box').style.display = card.mn ? '' : 'none';
+    applyMn(card);
     resetMotivationUI();
     refreshIntervals(card);
 
@@ -1965,6 +2117,7 @@ function dismissMotivationCard() {
 // ئەم فەنکشنە خشتەبەندی، failCount/reviewCount، و قۆناغی (status) کارتەکە نوێ دەکاتەوە.
 // دەگەڕێتەوە true ئەگەر پێویست بکات کارتەکە لەم خولەدا دووبارە بێتەوە (وەک "دووبارە").
 const LEARN_STEPS_MIN = [1, 10]; // هەنگاوەکانی فێربوون بە خولەک
+const MAX_INTERVAL_DAYS = 365, MAX_EASE = 3.5; // بێ سنوور مایەی تێکچوونی بەرواری (Date) و ون بوونی کارتە بۆ سەدان ساڵ
 const MIN_MS = 60000;
 function addDays(now, n) { const d = new Date(now); d.setDate(d.getDate() + n); return d.getTime(); }
 
@@ -1986,7 +2139,7 @@ function previewSchedule(card, rating, now) {
         if (rating === 1) { fail++; step = 0; due = now + LEARN_STEPS_MIN[0] * MIN_MS; }
         else if (rating === 2) due = now + (step === 0 ? 5 : LEARN_STEPS_MIN[1]) * MIN_MS;
         else if (rating === 3 && step < LEARN_STEPS_MIN.length - 1) { step++; due = now + LEARN_STEPS_MIN[step] * MIN_MS; }
-        else { iv = rating === 4 ? Math.max(3, base + 2) : base; step = 0; due = addDays(now, iv); status = 'reviewing'; }
+        else { iv = rating === 4 ? Math.max(3, base + 2) : base; step = 0; due = addDays(now, (iv = Math.min(iv, MAX_INTERVAL_DAYS))); status = 'reviewing'; }
     } else { // پێداچوونەوە (reviewing/mature/mastered)
         step = 0; status = 'reviewing';
         if (rating === 1) { fail++; ease = Math.max(1.3, ease - 0.2); iv = Math.max(1, Math.round(iv * 0.4)); status = 'learning'; due = now + LEARN_STEPS_MIN[0] * MIN_MS; }
@@ -1997,14 +2150,14 @@ function previewSchedule(card, rating, now) {
             if (rating === 2) { ease = Math.max(1.3, ease - 0.15); iv = hard; }
             else if (rating === 3) iv = good;
             else { ease += 0.15; iv = easy; }
-            due = addDays(now, iv);
+            due = addDays(now, (iv = Math.min(iv, MAX_INTERVAL_DAYS)));
         }
     }
     if (status === 'reviewing') {
         if (iv >= 21 && fail === 0 && (card.reviewCount || 0) + 1 >= 6) status = 'mastered';
         else if (iv >= 21) status = 'mature';
     }
-    return { ease, interval: iv, step, fail, status, due };
+    return { ease: Math.min(ease, MAX_EASE), interval: iv, step, fail, status, due };
 }
 
 function refreshIntervals(card) {
@@ -2038,7 +2191,7 @@ function scheduleCard(card, rating) {
     card.status = r.status;
     card.difficulty = Math.min(1, card.failCount / card.reviewCount);
     card.stability = card.interval;
-    if (!Number.isFinite(card.due) || !Number.isFinite(card.interval) || !Number.isFinite(card.easeFactor)) { card.interval = 1; card.easeFactor = 2.5; card.due = addDays(now, 1); }
+    if (!Number.isFinite(card.due) || !Number.isFinite(card.interval) || !Number.isFinite(card.easeFactor)) { card.interval = 1; card.easeFactor = 2.5; card.due = addDays(now, 1); card.status = 'reviewing'; }
     return card.due - now < 20 * MIN_MS; // true = لەم خولەدا دووبارە بێتەوە
 }
 
@@ -2666,6 +2819,11 @@ function mergeBackupInto(work, parsed) {
     const dUsed = new Set(work.decks.map(d => d.id));
     const dMap = new Map();
 
+    // --- فایلەکان ---
+    work.folders = Array.isArray(work.folders) ? work.folders : [];
+    (Array.isArray(parsed.folders) ? parsed.folders : []).forEach(f => {
+        if (f && typeof f.id === 'string' && /^[\w-]{1,40}$/.test(f.id) && typeof f.name === 'string' && f.name.trim() && !work.folders.some(x => x.id === f.id)) work.folders.push({ id: f.id, name: f.name.trim().slice(0, 100), created: num(f.created) || now });
+    });
     // --- دەستەکان ---
     (Array.isArray(parsed.decks) ? parsed.decks : []).forEach(d => {
         if (!d || typeof d !== 'object') { st.rejected++; return; }
@@ -2678,7 +2836,7 @@ function mergeBackupInto(work, parsed) {
         else {
             if (typeof d.id === 'string' && dUsed.has(d.id)) st.deckConflicts++;
             const id = (typeof d.id === 'string' && SAFE_DECK_ID.test(d.id) && !dUsed.has(d.id)) ? d.id : newDeckId(dUsed);
-            target = { id, name: name || 'دەستە', created: num(d.created) || now };
+            target = { id, name: name || 'دەستە', created: num(d.created) || now, folderId: (typeof d.folderId === 'string' && work.folders.some(f => f.id === d.folderId)) ? d.folderId : null };
             work.decks.push(target); dUsed.add(id); st.newDecks++;
         }
         if (d.id !== undefined) dMap.set(d.id, target.id);
