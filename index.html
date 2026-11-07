@@ -459,6 +459,97 @@ nav { -webkit-mask-image: linear-gradient(to right, transparent 0, #000 14px, #0
 /* مینی-تایمەری پۆمۆدۆرۆ لەسەر ژمارەی کارتەکان نەکەوێت */
 .pomo-mini-badge { padding: 5px 12px; font-size: 12px; color: #fff; }
 body.focus-active #study-progress-text { margin-left: 92px; }
+
+/* ===== فایل: سەرەکی + ناو فایل + بەڕێوەبردن ===== */
+.folder-row { cursor: pointer; }
+.folder-row:active, .mg-row:active { background: var(--panel-2); }
+.folder-row .chev, .mg-row .chev { color: var(--muted); font-size: 24px; line-height: 1; flex: none; }
+.due-b { color: var(--accent-2); font-weight: 700; }
+.fv-head { display: flex; align-items: center; gap: 10px; margin: 2px 0 14px; }
+.fv-head h2 { margin: 0; font-size: 20px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--white); }
+.fv-back { background: var(--panel-2); border: 1px solid var(--line); color: var(--text); width: 40px; height: 40px; border-radius: 12px; font-size: 24px; line-height: 1; cursor: pointer; flex: none; }
+#fv-body { display: grid; gap: 10px; }
+.fv-all { width: 100%; padding: 14px; font-size: 16px; margin: 0 0 4px; }
+.fv-empty { color: var(--muted); text-align: center; padding: 28px 8px; font-size: 14px; }
+.mg-row { display: flex; align-items: center; gap: 10px; padding: 14px; background: var(--panel-2); border: 1px solid var(--line-soft); border-radius: 14px; cursor: pointer; margin-bottom: 8px; }
+.home-hint { color: var(--muted); font-size: 12px; text-align: center; padding: 6px 0 0; }
+#backup-reminder { margin: 12px 0 0 !important; }
+#deck-list { margin-top: 16px; }
+#deck-manager-list .manage-item { flex-direction: column; align-items: stretch; gap: 10px; }
+#deck-manager-list .manage-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start; }
+#deck-manager-list .folder-select { flex: 1; min-width: 120px; max-width: none; }
+
+/* ===== فایل و دەستە: ڕووکاری پاکتر ===== */
+.folder-row { padding: 14px 16px; gap: 14px; min-height: 72px; }
+.folder-row h3 { font-size: 17px; margin: 0 0 4px; }
+.f-ico { width: 46px; height: 46px; border-radius: 14px; background: var(--accent-soft); display: grid; place-items: center; font-size: 22px; flex: none; }
+.due-pill { background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; flex: none; }
+.mg-row .f-ico { width: 38px; height: 38px; font-size: 18px; border-radius: 12px; }
+.mg-row { padding: 12px 14px; }
+.fv-head h2 { font-size: 21px; }
+.deck-row .btn-play { min-width: 104px; }
+/* مینی-تایمەر: لە خوارەوە تا تابەکانی سەرەوە دانەپۆشێت؛ لە کاتی خوێندندا لە سەرەوە */
+.pomo-mini-badge { top: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); }
+body.focus-active .pomo-mini-badge { top: 14px; bottom: auto; }
+
+/* ===== بەشی زیادکردن: سادە و ڕێکخراو ===== */
+.seg { display: flex; gap: 3px; background: var(--panel); border: 1px solid var(--line-soft); padding: 3px; border-radius: 14px; margin-bottom: 12px; }
+.seg-b { flex: 1; border: none; background: transparent; color: var(--muted); font-weight: 700; font-size: 14px; padding: 10px 6px; border-radius: 11px; cursor: pointer; }
+.seg-b.active { background: var(--accent); color: #fff; }
+.add-target { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding: 0 4px; }
+.add-target label { flex: none; color: var(--muted); font-size: 13px; font-weight: 600; }
+.add-target select { flex: 1; margin: 0; padding-top: 9px; padding-bottom: 9px; }
+.add-pane { display: none; }
+.fld { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin: 10px 2px 5px; }
+.add-pane .fld:first-child { margin-top: 0; }
+.add-pane input { margin: 0; }
+.add-save { width: 100%; margin-top: 16px; padding: 14px; font-size: 16px; }
+.add-help { margin: 0 0 12px; color: var(--muted); font-size: 13px; line-height: 1.7; }
+.add-help b { color: var(--text); }
+.add-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+.add-actions .primary, .add-actions .ghost { flex: 1; }
+#import-confirm-btn:disabled { opacity: .45; }
+
+/* ===== سەرەکی: ڕیزبەندی ڕوون ===== */
+#home.active { display: flex; flex-direction: column; gap: 14px; }
+#home > * { margin-top: 0; margin-bottom: 0; }
+#global-review-wrap:empty { display: none; }
+.cta-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 14px 16px; border-radius: 18px; background: linear-gradient(135deg, #2f6ee6, #3b7bf6); border: none; color: #fff; text-align: start; }
+.cta-card .cta-t { display: grid; gap: 3px; }
+.cta-card b { font-size: 16px; font-weight: 800; }
+.cta-card small { font-size: 12px; opacity: .85; }
+.cta-card .cta-go { flex: none; background: #fff; color: #2455c4; font-weight: 800; font-size: 14px; padding: 9px 16px; border-radius: 12px; }
+.sec-title { margin: 6px 4px -4px; font-size: 15px; font-weight: 800; color: var(--text); }
+.sec-inline { font-size: 15px; font-weight: 800; }
+#deck-list.grid { gap: 10px; }
+/* ===== کارتەکان: ئاسان بۆ بەکارهێنان ===== */
+.mg-toolbar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0 12px; }
+.mg-toolbar select { width: 100%; margin: 0; padding: 11px 12px; font-size: 14px; }
+.mg-toolbar .icon-btn { grid-column: 1 / -1; min-height: 42px; }
+.manage-item { flex-direction: column; align-items: stretch; gap: 10px; padding: 14px 12px; }
+.mi-main { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.mi-main input[type=checkbox] { width: 22px; height: 22px; margin: 2px 0 0; flex: none; }
+.mi-text { min-width: 0; flex: 1; }
+.mi-en { color: #fff; font-size: 16px; font-weight: 600; line-height: 1.45; overflow-wrap: anywhere; }
+.mi-ku { color: var(--muted); font-size: 14px; margin-top: 2px; overflow-wrap: anywhere; }
+.mi-meta { color: var(--accent-2); font-size: 11px; margin-top: 6px; line-height: 1.6; }
+.manage-item .manage-actions { justify-content: flex-end; flex-wrap: wrap; }
+.manage-item .manage-actions .icon-btn { padding: 7px 14px; font-size: 13px; min-height: 36px; }
+.bulk-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px; }
+.bulk-bar strong, .bulk-bar label, .bulk-bar select, .bulk-bar .danger { grid-column: 1 / -1; }
+.bulk-bar select { width: 100%; }
+.bulk-bar label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* ===== هەڵبژێری فایل و دەستە (زیادکردن) ===== */
+.add-target { display: flex; flex-direction: column; align-items: stretch; gap: 0; padding: 14px; background: var(--panel); border: 1px solid var(--line-soft); border-radius: var(--radius); }
+.tp-lbl { font-size: 12px; font-weight: 700; color: var(--muted); margin: 0 2px 8px; }
+.tp-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.pick-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 8px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel-2); color: var(--text); font-size: 14px; font-weight: 600; }
+.pick-chip small { color: var(--muted); font-weight: 500; }
+.pick-chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.pick-chip[aria-pressed="true"] small { color: rgba(255,255,255,0.85); }
+.tp-sum { font-size: 14px; font-weight: 700; color: var(--accent-2); padding-top: 10px; border-top: 1px solid var(--line-soft); }
+.tp-empty { font-size: 13px; color: var(--muted); padding: 6px 2px; }
 </style>
 </head>
 <body>
@@ -503,14 +594,15 @@ body.focus-active #study-progress-text { margin-left: 92px; }
             </button>
         </div>
 
-        <div class="panel" id="missions-panel">
-            <div class="panel-head"><h3>🎯 ئەرکی ڕۆژانە</h3><span class="chip" id="missions-summary">0/3</span></div>
+        <div id="global-review-wrap"></div> <!-- FEATURE: دوگمەی پێداچوونەوەی گشتی -->
+        <h3 class="sec-title" id="folders-title">📚 فایل و دەستەکانم</h3>
+        <div id="deck-list" class="grid"></div>
+
+    <div class="panel" id="missions-panel">
+            <div class="panel-head"><h3 class="sec-inline">🎯 ئەرکی ڕۆژانە</h3><span class="chip" id="missions-summary">0/3</span></div>
             <div class="m-note" id="missions-note"></div>
             <div id="missions-list"></div>
         </div>
-
-        <div id="global-review-wrap"></div> <!-- FEATURE: دوگمەی پێداچوونەوەی گشتی -->
-        <div id="deck-list" class="grid"></div>
     </section>
 
     <section id="rewards" class="view">
@@ -613,64 +705,74 @@ body.focus-active #study-progress-text { margin-left: 92px; }
         </div>
     </section>
 
-    <section id="add" class="view">
-        <div class="panel">
-            <h3>دەستەکان</h3>
-            <div id="deck-manager-list"></div>
-            <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-                <input id="new-deck-name" placeholder="ناوی دەستەی نوێ" style="margin:0; flex:1; min-width:180px;">
-                <button class="primary" onclick="handleCreateDeck()" style="flex-shrink:0;" aria-label="زیادکردنی دەستە" title="زیادکردنی دەستە">+</button>
-            </div>
-        </div>
-        <div class="panel">
-            <h3>هاوردەکردنی بە کۆمەڵ</h3>
-            <div class="setting-row" style="margin-bottom:10px;">
-                <label class="title" style="font-size:13px;">کارتی نوێ بۆ کام دەستە؟</label>
-                <select id="target-deck-select" style="width:100%; margin:0;"></select>
-            </div>
-            <textarea id="bulk-input" rows="8" placeholder="Apple | سێو&#10;Book | کتێب"></textarea>
-            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:8px;">
-                <button class="primary" onclick="previewBulkText()">پیشاندانی پێشبینین</button>
-                <button class="ghost" onclick="document.getElementById('import-file-input').click()">فایلی CSV / Excel</button>
-                <input type="file" id="import-file-input" hidden accept=".csv,.xlsx,.xls" onchange="handleImportFile(event)">
-            </div>
+    <section id="folder" class="view">
+        <div class="fv-head"><button class="fv-back" onclick="showV('home')" aria-label="گەڕانەوە">›</button><h2 id="fv-title"></h2></div>
+        <div id="fv-body"></div>
+    </section>
 
+    <section id="add" class="view">
+        <div class="seg" id="add-tabs" role="tablist" aria-label="جۆری زیادکردن">
+            <button class="seg-b" role="tab" data-pane="one" onclick="setAddTab('one')">کارتێک</button>
+            <button class="seg-b" role="tab" data-pane="bulk" onclick="setAddTab('bulk')">چەند کارتێک</button>
+            <button class="seg-b" role="tab" data-pane="decks" onclick="setAddTab('decks')">دەستە و فایل</button>
+        </div>
+        <div class="add-target" id="add-target">
+<select id="target-deck-select" hidden aria-hidden="true"></select>
+<div id="target-picker"></div>
+</div>
+
+        <div class="panel add-pane" data-pane="one">
+            <label class="fld" for="single-en">English</label>
+            <input id="single-en" dir="ltr" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="next" placeholder="apple" onkeydown="addKey(event,'en')">
+            <label class="fld" for="single-ku">کوردی</label>
+            <input id="single-ku" dir="rtl" autocomplete="off" enterkeyhint="done" placeholder="سێو" onkeydown="addKey(event,'ku')">
+            <label class="fld" for="single-mn">یادگە (دڵخواز)</label>
+            <input id="single-mn" dir="auto" autocomplete="off" enterkeyhint="done" placeholder="ڕێگایەک بۆ بیرهێنانەوە" onkeydown="addKey(event,'mn')">
+            <button class="primary add-save" onclick="addSingle()">زیادکردنی کارت</button>
+        </div>
+
+        <div class="panel add-pane" data-pane="bulk">
+            <p class="add-help">هەر ڕیزێک یەک کارتە: <b dir="ltr">English | کوردی | یادگە</b> (یادگە دڵخوازە). جیاکەرەوە دەکرێت <b>|</b> یان کۆما یان Tab بێت. هەروەها دەتوانیت فایلی CSV یان Excel هەڵبژێریت.</p>
+            <textarea id="bulk-input" rows="7" dir="auto" placeholder="Apple | سێو&#10;Book | کتێب"></textarea>
+            <div class="add-actions">
+                <button class="primary" onclick="previewBulkText()">پێشبینین</button>
+                <button class="ghost" onclick="document.getElementById('import-file-input').click()">فایلی CSV / Excel</button>
+                <input type="file" id="import-file-input" hidden accept=".csv,.txt,.xlsx,.xls" onchange="handleImportFile(event)">
+            </div>
             <div id="import-preview" class="import-preview" style="display:none;">
                 <div class="import-preview-header">
-                    <strong>پێشبینین (<span id="import-preview-count">0</span> کارت)</strong>
+                    <strong><span id="import-preview-count">0</span> کارت دەنێردرێت</strong>
                     <div>
                         <button class="icon-btn" onclick="togglePreviewAll(true)">هەمووی</button>
                         <button class="icon-btn" onclick="togglePreviewAll(false)">هیچکام</button>
                     </div>
                 </div>
+                <div id="import-target-note" class="hint" style="margin-bottom:6px;"></div>
                 <div id="import-dupe-note" class="hint" style="margin-bottom:8px;"></div>
                 <div id="import-preview-body" class="import-preview-body"></div>
                 <div class="edit-form-actions" style="margin-top:12px;">
-                    <button class="primary" onclick="confirmImportPreview()">زیادکردن</button>
+                    <button class="primary" id="import-confirm-btn" onclick="confirmImportPreview()">زیادکردن</button>
                     <button class="ghost" onclick="cancelImportPreview()">پاشگەزبوونەوە</button>
                 </div>
             </div>
         </div>
-        <div class="panel">
-            <h3>کارتی نوێ</h3>
-            <input id="single-en" placeholder="English" onkeydown="if(event.key==='Enter') addSingle()">
-            <input id="single-ku" placeholder="کوردی" onkeydown="if(event.key==='Enter') addSingle()">
-            <input id="single-mn" placeholder="یادگەش (دڵخواز)" onkeydown="if(event.key==='Enter') addSingle()">
-            <button class="primary" onclick="addSingle()">پاشەکەوتکردن</button>
+
+        <div class="panel add-pane" data-pane="decks">
+            <div id="deck-manager-list"></div>
         </div>
     </section>
 
     <section id="manage" class="view">
         <div class="panel">
             <input id="search-input" placeholder="بگەڕێ بۆ وشەیەک..." oninput="onManageSearchInput()">
-            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:10px 0;">
-                <select id="manage-sort" onchange="setManageSortBy(this.value)" style="width:auto; padding:8px 12px; margin:0;">
+            <div class="mg-toolbar">
+<select id="manage-sort" onchange="setManageSortBy(this.value)">
                     <option value="newest">نوێترین</option>
                     <option value="oldest">کۆنترین</option>
                     <option value="due">وادەی پێداچوونەوە</option>
                     <option value="forgotten">زۆرترین لەبیرکراو</option>
                 </select>
-                <select id="manage-deck-filter" onchange="managePage=0; renderManage();" style="width:auto; padding:8px 12px; margin:0;">
+                <select id="manage-deck-filter" onchange="managePage=0; renderManage();">
                     <option value="">هەموو دەستەکان</option>
                 </select>
                 <button class="icon-btn" onclick="toggleManageSelectAll()">هەڵبژاردن/لابردنی هەمووی</button>
@@ -899,7 +1001,7 @@ function cardById(id) { return state.cards.find(c => c.id === id) || null; }
 function inSessionFolder(c, key) {
     if (!String(key).startsWith('folder:')) return false;
     const d = state.decks.find(x => x.id === c.deckId);
-    return !!d && d.folderId === String(key).slice(7);
+    return !!d && deckInFolder(d, String(key).slice(7));
 }
 function currentSessionCard() {
     const s = state.session;
@@ -1109,15 +1211,17 @@ function showV(id) {
     document.querySelectorAll('.nav').forEach(n => n.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     // FIX: پێشتر ئەم دووگمەیە دیاری نەدەکرا دوای گۆڕینی لاپەڕە (چالاک نەدەبوو بە ڕوونی).
-    const navBtn = document.querySelector(`.nav[data-view="${id}"]`);
+    const navBtn = document.querySelector(`.nav[data-view="${id === 'folder' ? 'home' : id}"]`);
     if (navBtn) { navBtn.classList.add('active'); try { navBtn.scrollIntoView({ inline: 'center', block: 'nearest' }); } catch (e) {} }
 
     if (id === 'home' || id === 'rewards') renderHome();
+    if (id === 'folder') renderFolderView();
     if (id === 'manage') renderManage();
     if (id === 'settings' && typeof loadVoices === 'function') loadVoices(); // دەنگە نوێیەکان بخوێنەوە
     if (id === 'pomodoro') renderPomodoro();
     if (id === 'archive') renderArchive();
     if (id === 'add' || id === 'manage') renderDeckManagerUI();
+    if (id === 'add') setAddTab(addTab);
 }
 
 /* ---------------- cards / SRS v2 data model ---------------- */
@@ -1207,8 +1311,10 @@ function renameDeck(id, newName) {
 
 function deleteDeck(id) {
     if (state.decks.length <= 1) { toast('پێویستە لانیکەم یەک دەستە بمێنێتەوە'); return; }
-    if (!confirm('کارتەکانی ئەم دەستەیە دەگوازرێنەوە بۆ دەستەی سەرەکی. دڵنیایت؟')) return;
-    const fallback = state.decks.find(d => d.id !== id) || state.decks[0];
+    const doomed = state.decks.find(d => d.id === id); if (!doomed) return;
+    const fallback = state.decks.find(d => d.id === 'default' && d.id !== id) || state.decks.find(d => d.id !== id) || state.decks[0];
+    const n = state.cards.filter(c => c.deckId === id).length;
+    if (!confirm(`دەستەی «${doomed.name}» دەسڕدرێتەوە.${n ? ` ${n} کارتەکەی دەگوازرێنەوە بۆ «${fallback.name}» و هیچ کارتێک ناسڕدرێتەوە.` : ''} دڵنیایت؟`)) return;
     state.cards.forEach(c => { if (c.deckId === id) c.deckId = fallback.id; });
     state.decks = state.decks.filter(d => d.id !== id);
     save();
@@ -1219,7 +1325,11 @@ function deleteDeck(id) {
 function handleCreateDeck() {
     const input = document.getElementById('new-deck-name');
     const deck = createDeck(input.value);
-    if (deck) { input.value = ''; renderDeckManagerUI(); toast('✅ دەستەی نوێ دروستکرا: ' + deck.name); }
+    if (!deck) return;
+    if (manageFolderId && manageFolderId !== NO_FOLDER && state.folders.some(f => f.id === manageFolderId)) deck.folderId = manageFolderId;
+    save(); input.value = ''; renderDeckManagerUI(); renderHome();
+    const ts = document.getElementById('target-deck-select'); if (ts) ts.value = deck.id;
+    toast('✅ دەستەی نوێ دروستکرا: ' + deck.name + ' — ئێستا کارتی نوێ دەچێتە ناوی');
 }
 
 function handleRenameDeck(id) {
@@ -1229,37 +1339,67 @@ function handleRenameDeck(id) {
 }
 
 // هەموو ئەو select/list ـانەی پەیوەستن بە دەستەکانەوە نوێ دەکاتەوە (لە add، manage)
+const deckLabel = d => ((d.folderId && state.folders.some(f => f.id === d.folderId)) ? '📁 ' + folderName(d.folderId) + ' › ' : '') + d.name;
 function renderDeckManagerUI() {
     if (!state.decks) return;
     const managerList = document.getElementById('deck-manager-list');
     if (managerList) {
-        managerList.innerHTML = folderBlockHtml() + state.decks.map(d => {
-            const count = state.cards.filter(c => c.deckId === d.id).length;
-            return `<div class="manage-item">
-                <div style="color:white">🗂 ${escapeHtml(d.name)} <span style="color:var(--muted); font-size:12px;">(${count} کارت)</span></div>
-                <div class="manage-actions">
-                    <select class="folder-select" onchange="setDeckFolder('${d.id}', this.value)" aria-label="فایلی دەستە">${folderOptions(d.folderId)}</select>
-                    <button class="icon-btn" onclick="handleRenameDeck('${d.id}')">دەستکاری ناو</button>
-                    ${state.decks.length > 1 ? `<button class="icon-btn danger" onclick="deleteDeck('${d.id}')">سڕینەوە</button>` : ''}
-                </div>
-            </div>`;
-        }).join('');
+        managerList.innerHTML = managerHtml();
     }
     const targetSel = document.getElementById('target-deck-select');
     if (targetSel) {
         const current = targetSel.value;
-        targetSel.innerHTML = state.decks.map(d => `<option value="${d.id}">${escapeHtml(d.name)}</option>`).join('');
+        targetSel.innerHTML = state.decks.map(d => `<option value="${d.id}">${escapeHtml(deckLabel(d))}</option>`).join('');
         if (current && state.decks.find(d => d.id === current)) targetSel.value = current;
+        renderTargetPicker();
     }
     const filterSel = document.getElementById('manage-deck-filter');
     if (filterSel) {
         const current = filterSel.value;
-        filterSel.innerHTML = '<option value="">هەموو دەستەکان</option>' + state.decks.map(d => `<option value="${d.id}">${escapeHtml(d.name)}</option>`).join('');
+        filterSel.innerHTML = '<option value="">هەموو دەستەکان</option>' + state.decks.map(d => `<option value="${d.id}">${escapeHtml(deckLabel(d))}</option>`).join('');
         filterSel.value = current;
     }
     const moveSel = document.getElementById('bulk-move-select');
-    if (moveSel) moveSel.innerHTML = '<option value="">— دەستە هەڵبژێرە —</option>' + state.decks.map(d => `<option value="${d.id}">${escapeHtml(d.name)}</option>`).join('');
+    if (moveSel) moveSel.innerHTML = '<option value="">— دەستە هەڵبژێرە —</option>' + state.decks.map(d => `<option value="${d.id}">${escapeHtml(deckLabel(d))}</option>`).join('');
 }
+
+/* ---------------- هەڵبژێری فایل و دەستە بە کرتە (بۆ زیادکردن) ---------------- */
+let pickFolderKey = null;
+const deckFolderKey = d => (d.folderId && state.folders.some(f => f.id === d.folderId)) ? d.folderId : NO_FOLDER;
+function renderTargetPicker() {
+    const box = document.getElementById('target-picker'), sel = document.getElementById('target-deck-select');
+    if (!box || !sel) return;
+    if (!state.decks.length) { box.innerHTML = ''; return; }
+    const deck = state.decks.find(d => d.id === sel.value) || state.decks[0];
+    sel.value = deck.id;
+    const hasFolders = state.folders.length > 0;
+    const keys = hasFolders ? state.folders.map(f => f.id).concat(state.decks.some(d => deckFolderKey(d) === NO_FOLDER) ? [NO_FOLDER] : []) : [];
+    if (!pickFolderKey || !keys.includes(pickFolderKey)) pickFolderKey = deckFolderKey(deck);
+    const list = hasFolders ? state.decks.filter(d => deckFolderKey(d) === pickFolderKey) : state.decks;
+    const count = id => state.cards.filter(c => c.deckId === id).length;
+    let html = '';
+    if (hasFolders) {
+        html += '<div class="tp-lbl">١. فایل</div><div class="tp-row">' + keys.map(k => {
+            const n = state.decks.filter(d => deckFolderKey(d) === k).length;
+            return `<button type="button" class="pick-chip" aria-pressed="${k === pickFolderKey}" data-k="${escapeHtml(k)}" onclick="pickFolder(this.dataset.k)">${k === NO_FOLDER ? '📂 بێ فایل' : '📁 ' + escapeHtml(folderName(k))}<small>${n}</small></button>`;
+        }).join('') + '</div>';
+    }
+    if (state.decks.length > 1 || hasFolders) {
+        html += '<div class="tp-lbl">' + (hasFolders ? '٢. دەستە' : 'دەستە') + '</div><div class="tp-row">' + (list.length
+            ? list.map(d => `<button type="button" class="pick-chip" aria-pressed="${d.id === deck.id}" data-k="${escapeHtml(d.id)}" onclick="pickDeck(this.dataset.k)">🗂 ${escapeHtml(d.name)}<small>${count(d.id)}</small></button>`).join('')
+            : '<div class="tp-empty">هیچ دەستەیەک لەم فایلەدا نییە. لە «دەستە و فایل» دروستی بکە.</div>') + '</div>';
+    }
+    html += `<div class="tp-sum">زیادکردن بۆ: ${deckFolderKey(deck) !== NO_FOLDER ? '📁 ' + escapeHtml(folderName(deckFolderKey(deck))) + ' › ' : ''}🗂 ${escapeHtml(deck.name)}</div>`;
+    box.innerHTML = html;
+}
+function pickFolder(k) {
+    pickFolderKey = k;
+    const sel = document.getElementById('target-deck-select');
+    const cur = state.decks.find(d => d.id === sel.value);
+    if (!cur || deckFolderKey(cur) !== k) { const first = state.decks.find(d => deckFolderKey(d) === k); if (first) sel.value = first.id; }
+    renderTargetPicker();
+}
+function pickDeck(id) { const sel = document.getElementById('target-deck-select'); sel.value = id; renderTargetPicker(); }
 
 function getTargetDeckId() {
     const sel = document.getElementById('target-deck-select');
@@ -1271,22 +1411,43 @@ let pendingImportRows = [];
 
 // جیاکەرەوەکە خۆکارانە دەدۆزێتەوە: | یاخود Tab یاخود ,
 function detectDelimiter(text) {
-    const sample = text.split('\n').filter(l => l.trim()).slice(0, 5).join('\n');
-    if ((sample.match(/\|/g) || []).length > 0) return '|';
-    if ((sample.match(/\t/g) || []).length > 0) return '\t';
-    if ((sample.match(/,/g) || []).length > 0) return ',';
+    const sample = text.replace(/^\uFEFF/, '').split('\n').filter(l => l.trim()).slice(0, 5).join('\n').replace(/"[^"]*"/g, '');
+    for (const d of ['|', '\t', ';', ',']) if (sample.includes(d)) return d;
     return '|';
 }
-
+// خوێندنەوەی خشتە: کۆتیشن ("..."), کۆتیشنی دووگونە (""), ڕیزی فرە-هێڵی ناو خانە، BOM
+function splitTable(text, delim) {
+    const rows = []; let row = [], cell = '', q = false;
+    text = text.replace(/^\uFEFF/, '');
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (q) { if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += ch; }
+        else if (ch === '"' && cell === '') q = true;
+        else if (ch === delim) { row.push(cell); cell = ''; }
+        else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i + 1] === '\n') i++; row.push(cell); cell = ''; rows.push(row); row = []; }
+        else cell += ch;
+    }
+    if (q) return text.split(/\r?\n/).map(l => l.split(delim)); // کۆتیشنی کراوە نەکوژاوەتەوە: بێ کۆتیشن بخوێنەوە
+    row.push(cell); rows.push(row);
+    return rows;
+}
+let lastImportInfo = { skipped: 0, header: false };
+function tableToCards(table) {
+    const clean = table.map(r => r.map(c => String(c == null ? '' : c).trim())).filter(r => r.some(c => c));
+    const out = []; let skipped = 0, header = false;
+    if (clean.length && /^(english|en|word|words|ئینگلیزی|ئینگلیش)$/i.test(clean[0][0]) && /^(kurdish|ku|kurdi|translation|meaning|کوردی|وەرگێڕان|مانا)$/i.test(clean[0][1] || '')) header = true;
+    clean.forEach((r, i) => { if (header && i === 0) return; if (r[0] && r[1]) out.push({ en: r[0], ku: r[1], mn: r[2] || '' }); else skipped++; });
+    lastImportInfo = { skipped, header };
+    return out;
+}
 function parseDelimitedText(text) {
-    const delim = detectDelimiter(text);
-    const rows = [];
-    text.split('\n').forEach(line => {
-        const clean = line.replace(/\r$/, ''); // خەتی Windows پاک دەکاتەوە
-        if (!clean.trim()) return;
-        const parts = clean.split(delim).map(p => p.trim());
-        if (parts.length >= 2 && parts[0] && parts[1]) rows.push({ en: parts[0], ku: parts[1], mn: parts[2] || '' });
-    });
+    const d = detectDelimiter(text);
+    const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).filter(l => l.trim());
+    const mixed = !text.includes('"') && lines.some(l => !l.includes(d));
+    if (!mixed) return tableToCards(splitTable(text, d));
+    let skipped = 0, rows = [];
+    lines.forEach(l => { rows = rows.concat(tableToCards(splitTable(l, detectDelimiter(l)))); skipped += lastImportInfo.skipped || 0; });
+    lastImportInfo = { skipped, header: false };
     return rows;
 }
 
@@ -1299,34 +1460,29 @@ function previewBulkText() {
 // هاوردەکردنی فایلی ڕاستەقینەی CSV/Excel بە بەکارهێنانی کتێبخانەی SheetJS
 function handleImportFile(e) {
     const file = e.target.files[0];
-    if (!file) return;
-    if (typeof XLSX === 'undefined') {
-        toast('⚠️ کتێبخانەی هاوردەکردن هێشتا بارنەبووە، کەمێک چاوەڕێبە و دووبارە هەوڵبدەوە');
-        e.target.value = '';
-        return;
-    }
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        try {
-            const data = new Uint8Array(event.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const rows2d = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: '' });
-            const rows = [];
-            rows2d.forEach(r => {
-                const en = (r[0] || '').toString().trim(), ku = (r[1] || '').toString().trim(), mn = (r[2] || '').toString().trim();
-                if (en && ku) rows.push({ en, ku, mn });
-            });
-            if (rows.length === 0) { toast('⚠️ هیچ ڕیزێکی دروست لە فایلەکەدا نەدۆزرایەوە'); return; }
-            showImportPreview(rows);
-        } catch (err) {
-            console.error(err);
-            toast('❌ نەتوانرا فایلەکە بخوێنرێتەوە. دڵنیابەوە فۆرماتەکەی CSV یان Excel ـە');
-        }
-    };
-    reader.onerror = () => toast('❌ هەڵە لە خوێندنەوەی فایل');
-    reader.readAsArrayBuffer(file);
     e.target.value = '';
+    if (!file) return;
+    const isText = /\.(csv|txt|tsv)$/i.test(file.name);
+    if (!isText && typeof XLSX === 'undefined') { toast('⚠️ بۆ Excel پێویستە ئینتەرنێت هەبێت و پەڕەکە ڕیفرێش بکەیت. یان فایلەکە وەک CSV هەڵبگرە'); return; }
+    const reader = new FileReader();
+    reader.onerror = () => toast('❌ هەڵە لە خوێندنەوەی فایل');
+    reader.onload = ev => {
+        try {
+            let table;
+            if (isText) {
+                const buf = new Uint8Array(ev.target.result); let text;
+                try { text = new TextDecoder('utf-8', { fatal: true }).decode(buf); } catch (_) { text = new TextDecoder('windows-1256').decode(buf); }
+                table = splitTable(text, detectDelimiter(text));
+            } else {
+                const wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' });
+                table = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false, defval: '' });
+            }
+            const rows = tableToCards(table);
+            if (!rows.length) { toast('⚠️ هیچ ڕیزێکی دروست لە فایلەکەدا نەدۆزرایەوە (پێویستە هەر ڕیزێک English و کوردی هەبێت)'); return; }
+            setAddTab('bulk'); showImportPreview(rows);
+        } catch (err) { console.error(err); toast('❌ نەتوانرا فایلەکە بخوێنرێتەوە. دڵنیابەوە CSV یان Excel ـە'); }
+    };
+    reader.readAsArrayBuffer(file);
 }
 
 function showImportPreview(rows) {
@@ -1346,22 +1502,29 @@ function showImportPreview(rows) {
 
     document.getElementById('import-preview-body').innerHTML = rowsWithFlags.map((r, i) => `
         <div class="preview-row${r.isDupe ? ' preview-row-dupe' : ''}">
-            <input type="checkbox" id="prev-${i}" ${r.isDupe ? '' : 'checked'}>
+            <input type="checkbox" id="prev-${i}" checked onchange="updatePreviewCount()">
             <div class="preview-row-text">
-                <div class="preview-en">${escapeHtml(r.en)} ${r.isDupe ? '<span class="dupe-badge">دووبارە</span>' : ''}</div>
+                <div class="preview-en">${escapeHtml(r.en)} ${r.isDupe ? '<span class="dupe-badge">هاوشێوە</span>' : ''}</div>
                 <div class="preview-ku">${escapeHtml(r.ku)}</div>
             </div>
         </div>`).join('');
-    document.getElementById('import-preview-count').innerText = rows.length;
+    updatePreviewCount();
+    const tn = document.getElementById('import-target-note'); if (tn) tn.textContent = '📂 دەچێتە ناو: ' + deckNameOf(getTargetDeckId());
     const preview = document.getElementById('import-preview');
     preview.style.display = 'block';
     const noteEl = document.getElementById('import-dupe-note');
-    if (noteEl) noteEl.innerText = dupeCount > 0 ? `⚠️ ${dupeCount} دووبارە دۆزرایەوە و لە هەڵبژاردن لابران — ئەگەر دەتەوێت هەرچەندە زیادیان بکە، خانەکەیان چالاک بکەرەوە.` : '';
+    if (noteEl) noteEl.innerText = [dupeCount > 0 ? `${dupeCount} کارت هاوشێوەی کارتی ئێستان؛ هەموو زیاد دەکرێن مەگەر خانەکەیان لابەریت.` : '', lastImportInfo.skipped ? `${lastImportInfo.skipped} ڕیزی ناتەواو (بێ وەرگێڕان) پشتگوێ خران.` : '', lastImportInfo.header ? 'ڕیزی سەرەوە (ناونیشان) پشتگوێ خرا.' : ''].filter(Boolean).join(' ');
     preview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
+function updatePreviewCount() {
+    const n = document.querySelectorAll('#import-preview-body input[type=checkbox]:checked').length;
+    document.getElementById('import-preview-count').innerText = n;
+    const b = document.getElementById('import-confirm-btn'); if (b) { b.textContent = n ? 'زیادکردنی ' + n + ' کارت' : 'زیادکردن'; b.disabled = !n; }
+}
 function togglePreviewAll(checked) {
     document.querySelectorAll('#import-preview-body input[type=checkbox]').forEach(cb => cb.checked = checked);
+    updatePreviewCount();
 }
 
 function cancelImportPreview() {
@@ -1378,24 +1541,41 @@ function confirmImportPreview() {
         if (cb && cb.checked) { addCard(r.en, r.ku, r.mn, false, deckId); count++; }
     });
     if (count > 0) save();
-    toast(count > 0 ? `✅ ${count} کارت زیادکرا` : '⚠️ هیچ ڕیزێک هەڵنەبژێردرا');
+    toast(count > 0 ? `✅ ${count} کارت زیادکرا ← ${deckNameOf(deckId)}` : '⚠️ هیچ ڕیزێک هەڵنەبژێردرا');
     cancelImportPreview();
     document.getElementById('bulk-input').value = '';
     renderHome();
 }
 
+let addTab = 'one';
+function setAddTab(t) {
+    addTab = t;
+    document.querySelectorAll('#add .add-pane').forEach(p => { p.style.display = p.dataset.pane === t ? 'block' : 'none'; });
+    document.querySelectorAll('#add-tabs .seg-b').forEach(b => { const on = b.dataset.pane === t; b.classList.toggle('active', on); b.setAttribute('aria-selected', String(on)); });
+    document.getElementById('add-target').style.display = t === 'decks' ? 'none' : 'flex';
+}
+// Enter: English -> Kurdish -> پاشەکەوت (یادگە دڵخوازە)
+function addKey(e, which) {
+    if (e.key !== 'Enter' || e.isComposing) return;
+    e.preventDefault();
+    if (which === 'en') { const en = e.target.value.trim(); if (en) document.getElementById('single-ku').focus(); }
+    else addSingle();
+}
+const deckNameOf = id => ((state.decks.find(d => d.id === id) || {}).name || 'دەستە');
 function addSingle() {
     const enInput = document.getElementById('single-en'), kuInput = document.getElementById('single-ku'), mnInput = document.getElementById('single-mn');
     const en = enInput.value.trim(), ku = kuInput.value.trim(), mn = mnInput.value.trim();
     if (en && ku) {
         const isDupe = state.cards.some(c => c.en.trim().toLowerCase() === en.toLowerCase() && c.ku.trim().toLowerCase() === ku.toLowerCase());
-        addCard(en, ku, mn, true, getTargetDeckId());
-        toast(isDupe ? '⚠️ زیادکرا، بەڵام وەک دووبارە دیارە' : '✅ کارتەکە زیادکرا');
+        const targetId = getTargetDeckId();
+        addCard(en, ku, mn, true, targetId);
+        toast((isDupe ? '⚠️ زیادکرا (هاوشێوەی کارتێکی ئێستایە) ← ' : '✅ زیادکرا ← ') + deckNameOf(targetId));
         enInput.value = ''; kuInput.value = ''; mnInput.value = '';
         enInput.focus();
         renderHome();
     } else {
         toast('تکایە هەردوو خانەی English و کوردی پڕبکەرەوە');
+        (en ? kuInput : enInput).focus();
     }
 }
 
@@ -1511,15 +1691,21 @@ function renderRewardsExtras() {
     const { current, next, progress } = getLevelInfo(xp);
     set('lvl-mini-name', `${current.emoji} ${current.name}`);
     const fill = document.getElementById('lvl-mini-fill'); if (fill) fill.style.width = progress + '%';
-    set('lvl-mini-hint', next ? `${next.xp - xp} XP بۆ ${next.name}` : 'بەرزترین ئاست');
-    // دەستکەوتەکان لە داتای ئێستاوە دەژمێردرێن (هیچ داتایەکی نوێ پاشەکەوت ناکرێت)
+    const lh = document.getElementById('lvl-mini-hint'); if (lh) lh.innerHTML = next ? `<bdi dir="ltr">${next.xp - xp} XP</bdi> بۆ ${next.name}` : 'بەرزترین ئاست';
+    // دەستکەوتەکان: ژمارەی ژیانی (lifetime) هەرگیز کەم نابێتەوە، و دەستکەوتی کراوە دەپارێزرێت
     const totals = {
         reviews: state.cards.reduce((a, c) => a + (c.reviewCount || 0), 0),
         streak: Math.max(state.progress.bestStreak || 0, state.progress.streak || 0),
         mastered: state.cards.filter(c => c.status === 'mastered').length,
         pomo: state.progress.totalPomodoros || 0
     };
-    const items = BADGES.map(b => ({ ...b, val: totals[b.k], done: totals[b.k] >= b.goal }));
+    let changed = false;
+    const hw = state.progress.hw = (state.progress.hw && typeof state.progress.hw === 'object') ? state.progress.hw : {};
+    ['reviews', 'mastered'].forEach(k => { if (totals[k] > (Number(hw[k]) || 0)) { hw[k] = totals[k]; changed = true; } totals[k] = Math.max(totals[k], Number(hw[k]) || 0); });
+    const unlocked = state.progress.badges = (state.progress.badges && typeof state.progress.badges === 'object') ? state.progress.badges : {};
+    BADGES.forEach(b => { if (totals[b.k] >= b.goal && !unlocked[b.t]) { unlocked[b.t] = todayKey(); changed = true; } });
+    if (changed) save();
+    const items = BADGES.map(b => ({ ...b, val: Math.min(totals[b.k], b.goal), done: !!unlocked[b.t] || totals[b.k] >= b.goal }));
     set('badges-summary', `${items.filter(b => b.done).length}/${items.length}`);
     const grid = document.getElementById('badges-grid');
     if (grid) grid.innerHTML = items.map(b => `<div class="badge${b.done ? ' on' : ''}"><span class="b-ico">${b.icon}</span><span class="b-t">${b.t}</span><small>${b.done ? '✓' : b.val + '/' + b.goal}</small></div>`).join('');
@@ -1549,6 +1735,63 @@ function renderHeatmap() {
     wrap.innerHTML = html;
 }
 
+/* ---------------- فایل: سەرەکی -> فایل -> دەستەکان ---------------- */
+const NO_FOLDER = '__none';
+let openFolderId = null, studyReturnFolder = null, manageFolderId = null;
+const deckInFolder = (d, fid) => fid === NO_FOLDER ? !d.folderId : d.folderId === fid;
+const folderName = fid => fid === NO_FOLDER ? 'بێ فایل' : ((state.folders.find(f => f.id === fid) || {}).name || 'فایل');
+
+function deckRowEl(deck, now) {
+    const deckCards = state.cards.filter(c => c.deckId === deck.id);
+    const div = document.createElement('div');
+    div.className = 'deck deck-row';
+    if (!deckCards.length) {
+        div.innerHTML = `<div class="dr-main"><h3>🗂 ${escapeHtml(deck.name)}</h3><p style="color: var(--muted); margin:0">هیچ کارتێک لەم دەستەیەدا نییە</p></div>`;
+        return div;
+    }
+    const mastered = deckCards.filter(c => c.status === 'mastered').length;
+    const pct = (mastered / deckCards.length) * 100;
+    const dueCount = deckCards.filter(c => isDueReview(c, now)).length;
+    const newCount = deckCards.filter(isNewCard).length;
+    const laterCount = deckCards.filter(c => (c.reviewCount || 0) > 0 && c.due > now).length;
+    div.innerHTML = `<div class="dr-main"><h3>🗂 ${escapeHtml(deck.name)}</h3><p style="color: var(--muted)">${deckCards.length} کارت • ${dueCount} ئێستا • ${newCount} نوێ • ${laterCount} دواتر${mastered ? ' • ' + mastered + ' فێربوو' : ''}</p><div class="progress-mini"><div class="progress-bar" style="width: ${pct}%"></div></div></div><button class="btn-play" onclick="startStudy('${deck.id}')">${canResume(deck.id) ? 'بەردەوامبوون' : 'دەستپێکردن'}</button>`;
+    return div;
+}
+function folderRowEl(fid, now) {
+    const ds = state.decks.filter(d => deckInFolder(d, fid));
+    const ids = new Set(ds.map(d => d.id));
+    const cs = state.cards.filter(c => ids.has(c.deckId));
+    const due = cs.filter(c => isDueReview(c, now)).length, fresh = cs.filter(isNewCard).length;
+    const el = document.createElement('div');
+    el.className = 'deck deck-row folder-row'; el.setAttribute('role', 'button'); el.tabIndex = 0;
+    el.innerHTML = `<span class="f-ico" aria-hidden="true">${fid === NO_FOLDER ? '📂' : '📁'}</span><div class="dr-main"><h3>${escapeHtml(folderName(fid))}</h3><p style="color: var(--muted); margin:0">${ds.length} دەستە • ${cs.length} کارت${fresh ? ' • ' + fresh + ' نوێ' : ''}</p></div>${due ? '<span class="due-pill">' + due + ' ئێستا</span>' : ''}<span class="chev" aria-hidden="true">‹</span>`;
+    el.onclick = () => openFolder(fid);
+    el.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFolder(fid); } };
+    return el;
+}
+function openFolder(fid) { openFolderId = fid; showV('folder'); }
+function renderFolderView() {
+    const fid = openFolderId, body = document.getElementById('fv-body'), now = Date.now();
+    if (!fid || (fid !== NO_FOLDER && !state.folders.some(f => f.id === fid))) { openFolderId = null; showV('home'); return; }
+    document.getElementById('fv-title').textContent = (fid === NO_FOLDER ? '📂 ' : '📁 ') + folderName(fid);
+    body.textContent = '';
+    const ds = state.decks.filter(d => deckInFolder(d, fid));
+    const ids = new Set(ds.map(d => d.id));
+    if (state.cards.some(c => ids.has(c.deckId))) {
+        const all = document.createElement('button');
+        all.className = 'primary fv-all';
+        all.textContent = (canResume('folder:' + fid) ? 'بەردەوامبوون لە ' : 'خوێندنی هەموو ') + 'فایلەکە';
+        all.onclick = () => startStudy('folder:' + fid);
+        body.appendChild(all);
+    }
+    ds.forEach(d => body.appendChild(deckRowEl(d, now)));
+    if (!ds.length) { const e = document.createElement('div'); e.className = 'fv-empty'; e.textContent = 'ئەم فایلە دەستەی تێدا نییە. لە «+» دەستەیەک بخەرە ناوی.'; body.appendChild(e); }
+}
+function leaveStudy() { // دوای خوێندن بگەڕێوە بۆ ئەو شوێنەی لێی هاتیت
+    const f = studyReturnFolder;
+    if (f && (f === NO_FOLDER || state.folders.some(x => x.id === f))) { openFolderId = f; showV('folder'); } else showV('home');
+}
+
 function renderHome() {
     const now = Date.now();
     const rec = ensureDailyRecord();
@@ -1559,9 +1802,9 @@ function renderHome() {
     // --- کارتی پلە ---
     document.getElementById('level-badge').innerText = `${current.emoji} ${current.name}`;
     document.getElementById('level-progress-fill').style.width = progress + '%';
-    document.getElementById('level-hint').innerText = next
-        ? `${xp} / ${next.xp} XP بۆ گەیشتن بە ${next.emoji} ${next.name}`
-        : `${xp} XP — بەرزترین ئاست بەدەستهێنا! 👑`;
+    document.getElementById('level-hint').innerHTML = next
+        ? `<bdi dir="ltr">${xp} / ${next.xp} XP</bdi> بۆ گەیشتن بە ${next.emoji} ${next.name}`
+        : `<bdi dir="ltr">${xp} XP</bdi> — بەرزترین ئاست بەدەستهێنا! 👑`;
 
     renderHeatmap();
     renderMissions();
@@ -1576,7 +1819,8 @@ function renderHome() {
     const globalWrap = document.getElementById('global-review-wrap');
     const decksWithCards = new Set(state.cards.map(c => c.deckId)).size;
     if (globalWrap) globalWrap.innerHTML = (decksWithCards < 2 || dueTotal + newTotal === 0) ? '' :
-        `<button class="global-btn" onclick="startGlobalStudy()"><span>پێداچوونەوەی هەموو دەستەکان</span><b>${dueTotal + newTotal}</b></button>`;
+        `<button class="cta-card" onclick="startGlobalStudy()"><span class="cta-t"><b>پێداچوونەوەی هەموو دەستەکان</b><small>${dueTotal} ئێستا • ${newTotal} نوێ</small></span><span class="cta-go">دەستپێکردن</span></button>`;
+    const ft = document.getElementById('folders-title'); if (ft) ft.style.display = state.cards.length ? '' : 'none';
     const lastDay = state.progress.lastStudyDate;
     document.getElementById('count-streak').innerText = (lastDay === todayKey() || lastDay === todayKey(-1)) ? (state.progress.streak || 0) : 0;
     document.getElementById('count-xp').innerText = xp;
@@ -1592,35 +1836,15 @@ function renderHome() {
         return;
     }
 
-    const deckRow = (deck, deckCards, label, key) => {
-        const deckMastered = deckCards.filter(c => c.status === 'mastered').length;
-        const pct = (deckMastered / deckCards.length) * 100;
-        const dueCount = deckCards.filter(c => isDueReview(c, now)).length;
-        const newCount = deckCards.filter(isNewCard).length;
-        const laterCount = deckCards.filter(c => (c.reviewCount || 0) > 0 && c.due > now).length;
-        const div = document.createElement('div');
-        div.className = 'deck deck-row';
-        div.innerHTML = `<div class="dr-main"><h3>🗂 ${escapeHtml(label)}</h3><p style="color: var(--muted)">${deckCards.length} کارت • ${dueCount} ئێستا • ${newCount} نوێ • ${laterCount} دواتر${deckMastered ? ' • ' + deckMastered + ' فێربوو' : ''}</p><div class="progress-mini"><div class="progress-bar" style="width: ${pct}%"></div></div></div><button class="btn-play" onclick="startStudy('${key}')">${canResume(key) ? 'بەردەوامبوون' : 'دەستپێکردن'}</button>`;
-        return div;
-    };
     const shown = state.decks.filter(d => state.cards.some(c => c.deckId === d.id));
-    const placed = new Set();
-    state.folders.forEach(f => {
-        const ds = shown.filter(d => d.folderId === f.id);
-        if (!ds.length) return;
-        ds.forEach(d => placed.add(d.id));
-        const total = ds.reduce((n, d) => n + state.cards.filter(c => c.deckId === d.id).length, 0);
-        const det = document.createElement('details');
-        det.className = 'folder'; det.open = !closedFolders.has(f.id);
-        det.addEventListener('toggle', () => folderToggle(f.id, det.open));
-        const sum = document.createElement('summary');
-        sum.innerHTML = `<span>📁 ${escapeHtml(f.name)}</span><span class="f-count">${ds.length} دەستە • ${total} کارت</span><button class="btn-play f-go">${canResume('folder:' + f.id) ? 'بەردەوامبوون' : 'دەستپێکردن'}</button>`;
-        sum.querySelector('.f-go').addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); startStudy('folder:' + f.id); });
-        const body = document.createElement('div'); body.className = 'f-body';
-        ds.forEach(d => body.appendChild(deckRow(d, state.cards.filter(c => c.deckId === d.id), d.name, d.id)));
-        det.append(sum, body); deckList.appendChild(det);
-    });
-    shown.filter(d => !placed.has(d.id)).forEach(d => deckList.appendChild(deckRow(d, state.cards.filter(c => c.deckId === d.id), d.name, d.id)));
+    if (!state.folders.length) { // هێشتا فایلێک دروست نەکراوە: دەستەکان ڕاستەوخۆ پیشان دەدرێن
+        shown.forEach(d => deckList.appendChild(deckRowEl(d, now)));
+        const hint = document.createElement('div'); hint.className = 'home-hint'; hint.textContent = '💡 دەتوانیت دەستەکان لە فایلدا کۆبکەیتەوە: زیادکردن (+) ← فایل'; deckList.appendChild(hint);
+    } else {
+        state.folders.forEach(f => deckList.appendChild(folderRowEl(f.id, now)));
+        if (shown.some(d => !d.folderId)) deckList.appendChild(folderRowEl(NO_FOLDER, now));
+    }
+    if (document.getElementById('folder').classList.contains('active')) renderFolderView();
 }
 
 /* ---------------- study ---------------- */
@@ -1643,15 +1867,32 @@ const NEW_CARDS_PER_SESSION_CAP = 10;
 /* ---------------- فایل (گروپی دەستەکان) ---------------- */
 const closedFolders = new Set();
 function folderOptions(sel) { return '<option value="">— بێ فایل —</option>' + state.folders.map(f => `<option value="${f.id}"${f.id === sel ? ' selected' : ''}>📁 ${escapeHtml(f.name)}</option>`).join(''); }
-function folderBlockHtml() {
-    const rows = state.folders.map(f => {
-        const n = state.decks.filter(d => d.folderId === f.id).length;
-        return `<div class="manage-item"><div style="color:white">📁 ${escapeHtml(f.name)} <span style="color:var(--muted); font-size:12px;">(${n} دەستە)</span></div>
-            <div class="manage-actions"><button class="icon-btn" onclick="renameFolder('${f.id}')">دەستکاری ناو</button><button class="icon-btn danger" onclick="deleteFolder('${f.id}')">سڕینەوە</button></div></div>`;
-    }).join('');
-    return `<div class="manage-item" style="display:block"><div style="font-weight:700; margin-bottom:8px; color:white">📁 فایلەکان</div>
-        <div style="display:flex; gap:8px;"><input id="new-folder-name" maxlength="100" placeholder="ناوی فایلی نوێ"><button class="primary" style="flex:none" onclick="createFolder()" aria-label="زیادکردنی فایل">+</button></div></div>${rows}`;
+function managerHtml() {
+    if (manageFolderId && manageFolderId !== NO_FOLDER && !state.folders.some(f => f.id === manageFolderId)) manageFolderId = null;
+    const fid = manageFolderId;
+    if (!fid) {
+        const rows = state.folders.map(f => {
+            const n = state.decks.filter(d => d.folderId === f.id).length;
+            return `<div class="mg-row" role="button" tabindex="0" onclick="manageOpen('${f.id}')" onkeydown="if(event.key==='Enter')manageOpen('${f.id}')"><span class="f-ico" aria-hidden="true">📁</span><span style="flex:1; color:white; font-weight:600">${escapeHtml(f.name)}</span><span style="color:var(--muted); font-size:12px">${n} دەستە</span><span class="chev">‹</span></div>`;
+        }).join('');
+        const loose = state.decks.filter(d => !d.folderId).length;
+        const looseRow = (loose || !state.folders.length) ? `<div class="mg-row" role="button" tabindex="0" onclick="manageOpen('${NO_FOLDER}')" onkeydown="if(event.key==='Enter')manageOpen('${NO_FOLDER}')"><span class="f-ico" aria-hidden="true">📂</span><span style="flex:1; color:white; font-weight:600">بێ فایل</span><span style="color:var(--muted); font-size:12px">${loose} دەستە</span><span class="chev">‹</span></div>` : '';
+        return `<div style="display:flex; gap:8px; margin-bottom:12px"><input id="new-folder-name" maxlength="100" placeholder="ناوی فایلی نوێ" style="margin:0; flex:1"><button class="primary" style="flex:none" onclick="createFolder()" aria-label="زیادکردنی فایل" title="زیادکردنی فایل">+</button></div>${rows}${looseRow}`;
+    }
+    const isNone = fid === NO_FOLDER;
+    const ds = state.decks.filter(d => deckInFolder(d, fid));
+    const head = `<div class="fv-head"><button class="fv-back" onclick="manageBack()" aria-label="گەڕانەوە بۆ فایلەکان">›</button><h4 style="margin:0; flex:1; color:white">${isNone ? '📂' : '📁'} ${escapeHtml(folderName(fid))}</h4>${isNone ? '' : `<button class="icon-btn" onclick="renameFolder('${fid}')">گۆڕینی ناو</button><button class="icon-btn danger" onclick="deleteFolder('${fid}')">سڕینەوە</button>`}</div>`;
+    const create = `<div style="display:flex; gap:8px; margin-bottom:12px"><input id="new-deck-name" maxlength="100" placeholder="ناوی دەستەی نوێ" style="margin:0; flex:1"><button class="primary" style="flex:none" onclick="handleCreateDeck()" aria-label="زیادکردنی دەستە" title="زیادکردنی دەستە">+</button></div>`;
+    const rows = ds.map(d => {
+        const count = state.cards.filter(c => c.deckId === d.id).length;
+        return `<div class="manage-item"><div style="color:white">🗂 ${escapeHtml(d.name)} <span style="color:var(--muted); font-size:12px;">(${count} کارت)</span></div>
+            <div class="manage-actions"><select class="folder-select" onchange="setDeckFolder('${d.id}', this.value)" aria-label="گواستنەوە بۆ فایلێکی تر">${folderOptions(d.folderId)}</select>
+            <button class="icon-btn" onclick="handleRenameDeck('${d.id}')">گۆڕینی ناو</button>${state.decks.length > 1 ? `<button class="icon-btn danger" onclick="deleteDeck('${d.id}')">سڕینەوە</button>` : ''}</div></div>`;
+    }).join('') || '<div class="fv-empty">هیچ دەستەیەک لەم فایلەدا نییە</div>';
+    return head + create + rows;
 }
+function manageOpen(id) { manageFolderId = id; renderDeckManagerUI(); }
+function manageBack() { manageFolderId = null; renderDeckManagerUI(); }
 function folderCommit() { save(); renderHome(); renderDeckManagerUI(); }
 function createFolder() {
     const inp = document.getElementById('new-folder-name'); const name = (inp.value || '').trim().slice(0, 100);
@@ -1668,7 +1909,9 @@ function renameFolder(id) {
 function deleteFolder(id) {
     if (!confirm('فایلەکە دەسڕدرێتەوە، بەڵام هەموو دەستە و کارتەکان وەک خۆیان دەمێننەوە. دڵنیایت؟')) return;
     state.decks.forEach(d => { if (d.folderId === id) d.folderId = null; });
-    state.folders = state.folders.filter(f => f.id !== id); folderCommit();
+    state.folders = state.folders.filter(f => f.id !== id);
+    if (manageFolderId === id) manageFolderId = null; if (openFolderId === id) openFolderId = null;
+    folderCommit();
 }
 function setDeckFolder(deckId, folderId) {
     const d = state.decks.find(x => x.id === deckId); if (!d) return;
@@ -1685,7 +1928,7 @@ function canResume(key) {
 }
 function sessionTitle() {
     const k = String(state.session.deckId || '');
-    if (k.startsWith('folder:')) return '📁 ' + ((state.folders.find(f => f.id === k.slice(7)) || {}).name || 'فایل');
+    if (k.startsWith('folder:')) return (k.slice(7) === NO_FOLDER ? '📂 ' : '📁 ') + folderName(k.slice(7));
     return (state.decks.find(d => d.id === k) || {}).name || 'دەستە';
 }
 function resumeStudy() { showV('study'); renderCard(); startStudyTimer(); pomoAutoStart(true); toast('↩️ لەو شوێنەی وەستابوویت بەردەوام دەبیت'); }
@@ -1702,10 +1945,11 @@ function toggleMn(e) { e.stopPropagation(); mnOpen = !mnOpen; applyMn(currentSes
 
 function startStudy(deckId) {
     const now = Date.now();
+    studyReturnFolder = document.getElementById('folder').classList.contains('active') ? openFolderId : null;
     if (canResume(deckId)) { resumeStudy(); return; }
     const folderId = String(deckId).startsWith('folder:') ? String(deckId).slice(7) : null;
     const deckCards = folderId
-        ? state.cards.filter(c => { const d = state.decks.find(x => x.id === c.deckId); return d && d.folderId === folderId; })
+        ? state.cards.filter(c => { const d = state.decks.find(x => x.id === c.deckId); return d && deckInFolder(d, folderId); })
         : state.cards.filter(c => c.deckId === deckId);
     if (deckCards.length === 0) { toast('ئەم دەستەیە هیچ کارتێکی تێدا نییە'); return; }
 
@@ -1796,12 +2040,13 @@ function finishStudySession(msg) {
     stopStudyTimer();
     stopAutoRepeat();
     toast(msg);
-    showV('home');
+    leaveStudy();
 }
 
 // FEATURE (Global Review): پێداچوونەوەی گشتی لەسەر هەموو دەستەکان
 function startGlobalStudy() {
     const now = Date.now();
+    studyReturnFolder = null;
     if (canResume('global')) { resumeStudy(); return; }
     if (state.cards.length === 0) { toast('هیچ کارتێک نییە بۆ پێداچوونەوە'); return; }
 
@@ -2179,7 +2424,7 @@ function exitStudy() {
     stopAutoRepeat();
     stopStudyTimer();
     resetMotivationUI();
-    showV('home');
+    leaveStudy();
 }
 
 function scheduleCard(card, rating) {
@@ -2553,12 +2798,12 @@ function renderManage() {
             const checked = selectedCardIds.has(c.id) ? 'checked' : '';
             const isDifficult = (c.failCount || 0) >= 3; // FEATURE (Phase 6): وشە سەختەکان
             item.innerHTML = `
-                <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">
+                <div class="mi-main">
                     <input type="checkbox" ${checked} aria-label="هەڵبژاردنی کارت" onchange="toggleCardSelect(${c.id}, this.checked, this)">
-                    <div style="min-width:0;">
-                        <div style="color: white">${statusIcons[c.status] || ''} ${escapeHtml(c.en)} ${isDifficult ? '<span class="dupe-badge" style="border-color:#ff5d6c; color:#ff5d6c; background:#ff5d6c22;">🔥 سەخت</span>' : ''}</div>
-                        <div style="font-size: 12px; color: var(--muted)">${escapeHtml(c.ku)}</div>
-                        <div style="font-size: 11px; color: var(--accent-2); margin-top:2px;">${formatDueDate(c)} • 🗂 ${escapeHtml((state.decks.find(d => d.id === c.deckId) || {}).name || '')}</div>
+                    <div class="mi-text">
+                        <div class="mi-en">${statusIcons[c.status] || ''} ${escapeHtml(c.en)} ${isDifficult ? '<span class="dupe-badge" style="border-color:#ff5d6c; color:#ff5d6c; background:#ff5d6c22;">🔥 سەخت</span>' : ''}</div>
+                        <div class="mi-ku">${escapeHtml(c.ku)}</div>
+                        <div class="mi-meta">${formatDueDate(c)} • 🗂 ${escapeHtml((state.decks.find(d => d.id === c.deckId) || {}).name || '')}</div>
                     </div>
                 </div>
                 <div class="manage-actions">
@@ -2756,7 +3001,7 @@ function renderBackupReminder() {
     if (!el) {
         el = document.createElement('div'); el.id = 'backup-reminder'; el.setAttribute('role', 'status');
         el.style.cssText = 'display:flex;gap:10px;align-items:center;justify-content:space-between;margin:0 0 14px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel);font-size:13px;color:var(--text)';
-        const dl = document.getElementById('deck-list'); dl.parentNode.insertBefore(el, dl);
+        document.getElementById('home').appendChild(el); // لە کۆتایی لاپەڕە، نەک لەنێوان دەستەکان
     }
     el.textContent = '';
     const msg = document.createElement('span');
