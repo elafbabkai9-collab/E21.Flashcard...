@@ -550,6 +550,25 @@ body.focus-active .pomo-mini-badge { top: 14px; bottom: auto; }
 .pick-chip[aria-pressed="true"] small { color: rgba(255,255,255,0.85); }
 .tp-sum { font-size: 14px; font-weight: 700; color: var(--accent-2); padding-top: 10px; border-top: 1px solid var(--line-soft); }
 .tp-empty { font-size: 13px; color: var(--muted); padding: 6px 2px; }
+
+/* ===== سەرەکی: سادە و ئارام ===== */
+.today-card { padding: 16px; }
+.today-hint { margin-top: 10px; font-size: 12px; color: var(--muted); }
+.lvl-mini { display: grid !important; grid-template-columns: auto 1fr; align-items: center; gap: 4px 12px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line-soft); }
+.lvl-mini-name { margin: 0 !important; }
+.lvl-mini .level-progress-track { margin: 0; }
+.lvl-mini small { grid-column: 1 / -1; margin-top: 2px !important; }
+.streak-box b { font-size: 34px; line-height: 1; }
+.streak-box span { font-size: 12px; color: var(--muted); }
+.mis-panel { padding: 0; overflow: hidden; }
+.mis-panel > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 14px 16px; margin: 0; }
+.mis-panel > summary::-webkit-details-marker { display: none; }
+.mis-panel > summary h3 { flex: 1; margin: 0; }
+.mis-panel > summary .chev { color: var(--muted); font-size: 20px; transition: transform .15s; }
+.mis-panel[open] > summary .chev { transform: rotate(-90deg); }
+.mis-panel > .m-note, .mis-panel > #missions-list { padding: 0 16px; }
+.mis-panel > #missions-list { padding-bottom: 12px; }
+.mis-panel > .m-note:empty { display: none; }
 </style>
 </head>
 <body>
@@ -598,11 +617,11 @@ body.focus-active .pomo-mini-badge { top: 14px; bottom: auto; }
         <h3 class="sec-title" id="folders-title">📚 فایل و دەستەکانم</h3>
         <div id="deck-list" class="grid"></div>
 
-    <div class="panel" id="missions-panel">
-            <div class="panel-head"><h3 class="sec-inline">🎯 ئەرکی ڕۆژانە</h3><span class="chip" id="missions-summary">0/3</span></div>
-            <div class="m-note" id="missions-note"></div>
-            <div id="missions-list"></div>
-        </div>
+    <details class="panel mis-panel" id="missions-panel">
+        <summary class="panel-head"><h3 class="sec-inline">🎯 ئەرکی ڕۆژانە</h3><span class="chip" id="missions-summary">0/3</span><span class="chev" aria-hidden="true">‹</span></summary>
+        <div class="m-note" id="missions-note"></div>
+        <div id="missions-list"></div>
+    </details>
     </section>
 
     <section id="rewards" class="view">
